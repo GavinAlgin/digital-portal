@@ -1,13 +1,23 @@
-import React from 'react'
-import Footer from './components/Footer'
-import { UserCircleIcon } from '@heroicons/react/24/outline'
 import Header from './components/Header'
+import ListecLogo from '../../assets/cropped-flyer-02102024-133x133.png'
 
 const AdminDashboard = () => {
   return (
     <div x-data="{ userDropdownOpen: false, notificationsDropdownOpen: false, mobileNavOpen: false }">
         <div id="page-container" className="mx-auto flex min-h-screen w-full min-w-[320px] flex-col bg-white lg:pt-20">
-            <Header />
+            <Header
+                logo={ListecLogo}
+                logoText="LISTEC"
+                navItems={[
+                { label: "Dashboard", href: "/admin" },
+                { label: "Tickets", href: "/admin/tickets" },
+                { label: "Reports", href: "#" },
+                { label: "Users", href: "/admin/users" },
+                ]}
+                notificationsCount={3}
+                userName="Gavin Algin"
+                userProfileUrl="#"
+            />
 
             <main id="page-content" className="flex max-w-full flex-auto flex-col">
             <div className="container mx-auto px-4 pt-6 lg:px-8 lg:pt-8 xl:max-w-7xl">
@@ -761,13 +771,6 @@ const AdminDashboard = () => {
             </div>
             </main>
 
-            <Footer
-                brandName="LISTEC"
-                brandLink="https://mybrand.com"
-                authorName="Custom Author"
-                authorUrl="https://customauthor.com"
-                authorIcon={<UserCircleIcon className="text-blue-600" />}
-            />
         </div>
     </div>
   )

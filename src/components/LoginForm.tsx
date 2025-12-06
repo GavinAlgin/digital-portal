@@ -4,12 +4,15 @@ import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moodlelogo from "../assets/moodlelogo.jpeg";
 import ListecLogo from "../assets/cropped-flyer-02102024-133x133.png";
+import { useAuth } from "../hooks/context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
+
 
   const notifyError = (msg: string) =>
     toast.error(msg, {
@@ -24,14 +27,20 @@ export default function Login() {
 //       theme: "colored",
 //     });
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
     if (!email.includes("@")) return notifyError("Invalid email address.");
     if (password.length < 6)
       return notifyError("Password must be at least 6 characters.");
 
-    setLoading(true);
-    navigate('/admin');
+    if (email === "admin@example.com") {
+      login("admin");
+      navigate("/admin");
+    } else {
+      login("user");
+      navigate("/user");
+    }
   };
+
 
   return (
     <div

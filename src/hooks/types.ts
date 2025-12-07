@@ -7,3 +7,11 @@ export interface User {
   campus: string;
   avatarUrl?: string; // optional
 }
+
+export interface Student {
+  id: string;
+  name: string;
+  email: string;
+  status: "Active" | "Suspended";
+  createdAt?: string;
+}

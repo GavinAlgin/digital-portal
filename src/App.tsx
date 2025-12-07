@@ -4,6 +4,8 @@ import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import { AuthProvider, useAuth } from "./hooks/context/AuthContext";
 import ProtectedRoute from "./hooks/routes/ProtectedRoute";
+import UsersDataDashboard from "./pages/admin/UsersDataDashboard";
+import EventDashboard from "./pages/admin/EventDashboard";
 
 function AppRoutes() {
   const { isAuthenticated, role } = useAuth();
@@ -48,6 +50,22 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/tickets"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <EventDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <UsersDataDashboard />
           </ProtectedRoute>
         }
       />

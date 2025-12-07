@@ -15,3 +15,4 @@ export interface Student {
   status: "Active" | "Suspended";
   createdAt?: string;
 }
+

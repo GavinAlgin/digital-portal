@@ -1,7 +1,10 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import ActiveClasses from "../components/ListAction";
 import StudentCard from "../components/StudentCard";
 import type { User } from "../hooks/types";
+import { useAuth } from "../hooks/context/AuthContext";
 
 const loggedInUser: User = {
   id: "1",
@@ -11,17 +14,19 @@ const loggedInUser: User = {
   campus: "Polokwane Campus",
 };
 
-function index() {
+export default function Index() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  
   const handleLogout = () => {
-    console.log("Logging out...");
-    // your logout logic here
+    logout();
+    navigate("/login");
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Header />
 
-      {/* Main content scrollable area */}
       <main className="px-4 sm:px-6 md:px-8 flex-1 pb-24">
         <div className="p-4">
           <StudentCard user={loggedInUser} />
@@ -29,7 +34,6 @@ function index() {
         </div>
       </main>
 
-      {/* Bottom fixed logout button */}
       <div className="fixed bottom-0 left-0 right-0 bg-gray-100 p-4 backdrop-blur-md">
         <button
           onClick={handleLogout}
@@ -43,5 +47,3 @@ function index() {
     </div>
   );
 }
-
-export default index;

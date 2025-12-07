@@ -91,12 +91,12 @@ export default function StudentDashboard() {
         userProfileUrl="#"
       />
 
-      <div className="p-6">
+      <div className="p-6 mt-18">
         <div className="flex justify-between mb-4">
           <h2 className="text-2xl font-bold">Students</h2>
           <button
             onClick={openAddModal}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-black cursor text-white px-4 py-2 rounded hover:bg-blue-700"
           >
             + Add Student
           </button>

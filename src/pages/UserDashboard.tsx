@@ -5,6 +5,7 @@ import ActiveClasses from "../components/ListAction";
 import StudentCard from "../components/StudentCard";
 import type { User } from "../hooks/types";
 import { useAuth } from "../hooks/context/AuthContext";
+import moodlelogo from "../assets/moodlelogo.jpeg";
 
 const loggedInUser: User = {
   id: "1",
@@ -42,6 +43,12 @@ export default function Index() {
             py-3 rounded-xl text-center 
             active:bg-red-600 transition">
           Log Out
+        </button>
+        <button
+          className="w-full py-3 rounded-xl flex justify-center items-center gap-2 transition"
+          style={{ backgroundColor: "#FFFFFF20", color: "white" }}>
+          <img src={moodlelogo} className="h-5 rounded-md" />
+          Continue To Moodle
         </button>
       </div>
     </div>

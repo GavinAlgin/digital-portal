@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import moodlelogo from "../assets/moodlelogo.jpeg";
 import ListecLogo from "../assets/cropped-flyer-02102024-133x133.png";
 import { useAuth } from "../hooks/context/AuthContext";
 import { supabase } from "../hooks/supabase/supabaseClient";
@@ -159,13 +158,6 @@ export default function Login() {
           <span className="text-sm text-white">or</span>
           <div className="h-px flex-1" style={{ backgroundColor: "#BFD1FF50" }} />
         </div>
-
-        <button
-          className="w-full py-3 rounded-xl flex justify-center items-center gap-2 transition"
-          style={{ backgroundColor: "#FFFFFF20", color: "white" }}>
-          <img src={moodlelogo} className="h-5 rounded-md" />
-          Continue To Moodle
-        </button>
 
         <p className="text-center text-sm" style={{ color: "#BFD1FF" }}>
           Trouble logging into your account?{" "}

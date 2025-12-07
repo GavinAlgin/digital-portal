@@ -1,7 +1,20 @@
 import Header from './components/Header'
 import ListecLogo from '../../assets/cropped-flyer-02102024-133x133.png'
+import { useEffect, useState } from 'react'
+import { getCurrentUser, type User } from '../../hooks/context/AdminLogged';
 
 const AdminDashboard = () => {
+    const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const loggedUser = await getCurrentUser();
+            setUser(loggedUser);
+        };
+        fetchUser();
+    }, []);
+
+    if (!user) return <p>Loading or not logged in...</p>
   return (
     <div x-data="{ userDropdownOpen: false, notificationsDropdownOpen: false, mobileNavOpen: false }">
         <div id="page-container" className="mx-auto flex min-h-screen w-full min-w-[320px] flex-col bg-white lg:pt-20">
@@ -11,11 +24,11 @@ const AdminDashboard = () => {
                 navItems={[
                 { label: "Dashboard", href: "/admin" },
                 { label: "Tickets", href: "/admin/tickets" },
-                { label: "Reports", href: "#" },
+                { label: "Attendance", href: "#" },
                 { label: "Users", href: "/admin/users" },
                 ]}
                 notificationsCount={3}
-                userName="Gavin Algin"
+                userName={user.name ?? user.email ?? "User"}
                 userProfileUrl="#"
             />
 

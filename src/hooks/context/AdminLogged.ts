@@ -4,8 +4,8 @@ import { supabase } from "../supabase/supabaseClient";
 export interface User {
   id: string;
   email: string | null;
-  name: string | null;
-  username: string | null;
+  last_name: string | null;
+  first_name: string | null;
   role: string | null;
 }
 
@@ -19,8 +19,8 @@ export const getCurrentUser = async (): Promise<User | null> => {
   if (!currentUser) return null;
 
   const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("username, name, role")
+    .from("users")
+    .select("first_name, last_name, role")
     .eq("id", currentUser.id)
     .single();
 
@@ -29,8 +29,8 @@ export const getCurrentUser = async (): Promise<User | null> => {
     return {
       id: currentUser.id,
       email: currentUser.email ?? null,
-      username: null,
-      name: null,
+      first_name: null,
+      last_name: null,
       role: null,
     };
   }
@@ -38,8 +38,8 @@ export const getCurrentUser = async (): Promise<User | null> => {
   return {
     id: currentUser.id,
     email: currentUser.email ?? null,
-    username: profile.username ?? null,
-    name: profile.name ?? null,
+    first_name: profile.first_name ?? null,
+    last_name: profile.last_name ?? null,
     role: profile.role ?? null,
   };
 };

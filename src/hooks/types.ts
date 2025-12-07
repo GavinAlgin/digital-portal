@@ -10,7 +10,12 @@ export interface User {
 
 export interface Student {
   id: string;
-  name: string;
+  first_name: string;
+  last_name: string;
+  date_of_birth: Date;
+  id_number: string;
+  course: string;
+  faculty:string;
   email: string;
   status: "Active" | "Suspended";
   createdAt?: string;

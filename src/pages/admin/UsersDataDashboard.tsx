@@ -5,76 +5,136 @@ import StudentModal from "../../components/StudentModal";
 import DeleteModal from "../../components/DeleteModal";
 import Header from "./components/Header";
 import type { Student } from "../../hooks/types";
-
-const initialStudents: Student[] = [
-  { id: "STU-001", name: "John Doe", email: "john@example.com", status: "Active", createdAt: "2025-12-01" },
-  { id: "STU-002", name: "Jane Smith", email: "jane@example.com", status: "Suspended", createdAt: "2025-12-02" },
-];
+import { getCurrentUser, type User } from "../../hooks/context/AdminLogged";
+import {
+  addStudent,
+  fetchStudents,
+  removeStudent,
+  toggleStudentStatus,
+  updateStudent,
+} from "../../hooks/supabase/supabaseActions";
 
 export default function StudentDashboard() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"All" | "Active" | "Suspended">("All");
+  const [filterStatus, setFilterStatus] =
+    useState<"All" | "Active" | "Suspended">("All");
+
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
+  /* ----------------------- LOAD CURRENT USER ----------------------- */
   useEffect(() => {
-    // Simulate API fetch
-    setTimeout(() => {
-      setStudents(initialStudents);
-      setLoading(false);
-    }, 1000);
+    const fetchUser = async () => {
+      const loggedUser = await getCurrentUser();
+      setUser(loggedUser);
+    };
+    fetchUser();
   }, []);
 
-  const openEditModal = (student: Student) => { setSelectedStudent(student); setShowStudentModal(true); };
-  const openAddModal = () => { setSelectedStudent(null); setShowStudentModal(true); };
+  /* ----------------------- LOAD STUDENTS ----------------------- */
+  useEffect(() => {
+    const loadStudents = async () => {
+      const { data, error } = await fetchStudents();
+      if (error) {
+        console.error("Failed to load students:", error);
+      } else if (data) {
+        setStudents(data);
+      }
+      setLoading(false);
+    };
+    loadStudents();
+  }, []);
 
-  const saveStudent = (student: Student) => {
-    if (student.id && students.some((s) => s.id === student.id)) {
-      setStudents((prev) => prev.map((s) => (s.id === student.id ? student : s)));
+  /* ----------------------- MODAL CONTROLS ----------------------- */
+  const openEditModal = (student: Student) => {
+    setSelectedStudent(student);
+    setShowStudentModal(true);
+  };
+
+  const openAddModal = () => {
+    setSelectedStudent(null);
+    setShowStudentModal(true);
+  };
+
+  const openDeleteModalFn = (student: Student) => {
+    setSelectedStudent(student);
+    setShowDeleteModal(true);
+  };
+
+  /* ----------------------- SAVE STUDENT ----------------------- */
+  const saveStudent = async (student: Student) => {
+    if (student.id) {
+      // UPDATE
+      const { error } = await updateStudent(student);
+      if (!error) {
+        setStudents((prev) =>
+          prev.map((s) => (s.id === student.id ? student : s))
+        );
+      }
     } else {
-      const newStudent: Student = {
-        ...student,
-        id: `STU-${Math.floor(Math.random() * 10000).toString().padStart(4, "0")}`,
-        status: "Active",
-        createdAt: new Date().toISOString().split("T")[0],
-      };
-      setStudents((prev) => [...prev, newStudent]);
+      // CREATE
+      const { data, error } = await addStudent(student);
+      if (!error && data) {
+        setStudents((prev) => [...prev, data[0]]);
+      }
     }
     setShowStudentModal(false);
   };
 
-  const openDeleteModalFn = (student: Student) => { setSelectedStudent(student); setShowDeleteModal(true); };
-  const deleteStudent = (studentId: string) => { 
-    setStudents((prev) => prev.filter((s) => s.id !== studentId)); 
-    setShowDeleteModal(false); 
+  /* ----------------------- DELETE STUDENT ----------------------- */
+  const deleteStudent = async (id: string) => {
+    const { error } = await removeStudent(id);
+    if (!error) {
+      setStudents((prev) => prev.filter((s) => s.id !== id));
+    }
+    setShowDeleteModal(false);
   };
 
-  const toggleSuspend = (student: Student) => {
-    setStudents((prev) =>
-      prev.map((s) =>
-        s.id === student.id
-          ? { ...s, status: s.status === "Active" ? "Suspended" : "Active" }
-          : s
-      )
-    );
+  /* ----------------------- SUSPEND / ACTIVATE ----------------------- */
+  const toggleSuspend = async (student: Student) => {
+    const { error } = await toggleStudentStatus(student);
+    if (!error) {
+      setStudents((prev) =>
+        prev.map((s) =>
+          s.id === student.id
+            ? { ...s, status: s.status === "Active" ? "Suspended" : "Active" }
+            : s
+        )
+      );
+    }
   };
 
-  const sendInvitation = (student: Student) => alert(`Invitation email sent to ${student.email}`);
-  const sendChangePassword = (student: Student) => alert(`Password reset email sent to ${student.email}`);
+  /* ----------------------- EMAIL ACTIONS ----------------------- */
+  const sendInvitation = (student: Student) =>
+    alert(`Invitation email sent to ${student.email}`);
 
-  // Real-time search + filter using useMemo
+  const sendChangePassword = (student: Student) =>
+    alert(`Password reset email sent to ${student.email}`);
+
+  /* ----------------------- SEARCH + FILTER ----------------------- */
   const filteredStudents = useMemo(() => {
-    return students.filter((s) =>
-      (filterStatus === "All" || s.status === filterStatus) &&
-      (s.name.toLowerCase().includes(search.toLowerCase()) ||
-        s.email.toLowerCase().includes(search.toLowerCase()) ||
-        s.id.toLowerCase().includes(search.toLowerCase()))
-    );
+    return students.filter((s) => {
+      const fullName =
+        `${s.first_name ?? ""} ${s.last_name ?? ""}`.trim().toLowerCase();
+
+      return (
+        (filterStatus === "All" || s.status === filterStatus) &&
+        (fullName.includes(search.toLowerCase()) ||
+          (s.email ?? "").toLowerCase().includes(search.toLowerCase()) ||
+          (s.id ?? "").toLowerCase().includes(search.toLowerCase()))
+      );
+    });
   }, [students, search, filterStatus]);
 
+  /* ----------------------- AUTH HANDLING ----------------------- */
+  if (!user)
+    return <div className="p-10 text-center text-red-600">Not logged in.</div>;
+
+  /* ----------------------- UI ----------------------- */
   return (
     <div className="min-h-screen bg-gray-50">
       <Header
@@ -87,7 +147,7 @@ export default function StudentDashboard() {
           { label: "Users", href: "/admin/users" },
         ]}
         notificationsCount={3}
-        userName="Gavin Algin"
+        userName={user.email}
         userProfileUrl="#"
       />
 
@@ -96,12 +156,13 @@ export default function StudentDashboard() {
           <h2 className="text-2xl font-bold">Students</h2>
           <button
             onClick={openAddModal}
-            className="bg-black cursor text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-black text-white px-4 py-2 rounded hover:bg-blue-700"
           >
             + Add Student
           </button>
         </div>
 
+        {/* Search & Filter */}
         <div className="flex gap-4 mb-4">
           <input
             type="text"
@@ -112,7 +173,9 @@ export default function StudentDashboard() {
           />
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as "All" | "Active" | "Suspended")}
+            onChange={(e) =>
+              setFilterStatus(e.target.value as "All" | "Active" | "Suspended")
+            }
             className="border p-2 rounded"
           >
             <option value="All">All Status</option>
@@ -121,10 +184,13 @@ export default function StudentDashboard() {
           </select>
         </div>
 
+        {/* Table */}
         {loading ? (
           <div className="text-center py-10 text-gray-500">Loading...</div>
         ) : filteredStudents.length === 0 ? (
-          <div className="text-center py-10 text-gray-500">No students found.</div>
+          <div className="text-center py-10 text-gray-500">
+            No students found.
+          </div>
         ) : (
           <div className="overflow-x-auto bg-white shadow rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
@@ -139,16 +205,22 @@ export default function StudentDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredStudents.map((student) => (
-                  <tr key={student.id}>
-                    <td className="px-4 py-2">{student.id}</td>
-                    <td className="px-4 py-2">{student.name}</td>
-                    <td className="px-4 py-2">{student.email}</td>
-                    <td className="px-4 py-2">{student.status}</td>
-                    <td className="px-4 py-2">{student.createdAt}</td>
+                {filteredStudents.map((s) => (
+                  <tr key={s.id}>
+                    <td className="px-4 py-2">{s.id}</td>
+                    <td className="px-4 py-2">
+                      {s.first_name} {s.last_name}
+                    </td>
+                    <td className="px-4 py-2">{s.email}</td>
+                    <td className="px-4 py-2">{s.status}</td>
+                    <td className="px-4 py-2">
+                      {s.created_at
+                        ? new Date(s.created_at).toLocaleDateString()
+                        : ""}
+                    </td>
                     <td className="px-4 py-2 text-right">
                       <ActionDropdown
-                        student={student}
+                        student={s} // PASS FULL STUDENT OBJECT
                         openEditModal={openEditModal}
                         toggleSuspend={toggleSuspend}
                         sendInvitation={sendInvitation}
@@ -174,7 +246,7 @@ export default function StudentDashboard() {
 
       {showDeleteModal && selectedStudent && (
         <DeleteModal
-          student={selectedStudent}
+          student={selectedStudent} // PASS FULL STUDENT OBJECT
           onClose={() => setShowDeleteModal(false)}
           onDelete={() => deleteStudent(selectedStudent.id)}
         />
@@ -182,9 +254,6 @@ export default function StudentDashboard() {
     </div>
   );
 }
-
-
-
 
 
 // import { useState } from "react";

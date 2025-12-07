@@ -43,7 +43,7 @@ export default function Login() {
       if (isIdLogin) {
         // Lookup the email for the given student/staff ID
         const { data: userProfile, error: lookupError } = await supabase
-          .from("profiles")
+          .from("users")
           .select("email")
           .eq("id_number", emailToUse) // use the student/staff ID column
           .single();
@@ -67,7 +67,7 @@ export default function Login() {
 
       // Fetch profile to determine role
       const { data: profile, error: profileError } = await supabase
-        .from("profiles")
+        .from("users")
         .select("role")
         .eq("id", authData.user.id)
         .single();

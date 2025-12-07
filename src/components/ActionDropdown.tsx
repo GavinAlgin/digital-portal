@@ -1,11 +1,7 @@
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
 import React, { useState, useRef, useEffect } from "react";
+import type { Student } from "../hooks/types";
 
-interface Student {
-  id: string;
-  name: string;
-  status: "Active" | "Suspended";
-}
 
 interface ActionDropdownProps {
   student: Student;
@@ -27,14 +23,12 @@ export default function ActionDropdown({
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);

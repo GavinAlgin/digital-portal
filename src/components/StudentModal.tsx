@@ -1,13 +1,15 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createLISUser } from "../hooks/supabase/createLisUser";
+import { getCurrentUser, type User } from "../hooks/context/AdminLogged";
 
 interface Student {
   id?: string;
   first_name: string;
   last_name: string;
+  email: string;
   date_of_birth: string;
   status: "Active" | "Suspended";
   course: string;
@@ -20,9 +22,11 @@ interface StudentModalProps {
   onSave: (student: Student) => Promise<void>;
 }
 
+/* ---------------- ZOD SCHEMA ---------------- */
 const StudentSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
+  email: z.string().email("Valid email is required"),
   date_of_birth: z.string().min(1, "Date of birth is required"),
   status: z.enum(["Active", "Suspended"]),
   course: z.string().min(1, "Course is required"),
@@ -33,6 +37,15 @@ type StudentFormData = z.infer<typeof StudentSchema>;
 
 export default function StudentModal({ student, onClose, onSave }: StudentModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const loggedUser = await getCurrentUser();
+      setUser(loggedUser);
+    };
+    fetchUser();
+  }, []);
 
   const {
     register,
@@ -44,6 +57,7 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
     defaultValues: {
       first_name: "",
       last_name: "",
+      email: "",
       date_of_birth: "",
       status: "Active",
       course: "BSIT",
@@ -51,11 +65,12 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
     },
   });
 
-  // Populate form when editing
+  /* -------- Populate data when editing -------- */
   useEffect(() => {
     if (student) {
       setValue("first_name", student.first_name);
       setValue("last_name", student.last_name);
+      setValue("email", student.email);
       setValue("date_of_birth", student.date_of_birth);
       setValue("status", student.status);
       setValue("course", student.course);
@@ -63,7 +78,7 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
     }
   }, [student, setValue]);
 
-  // Close modal on outside click
+  /* -------- Close modal click outside -------- */
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
@@ -74,16 +89,19 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
 
+  /* ---------------- SUBMIT ---------------- */
   async function onSubmit(data: StudentFormData) {
     try {
+      // Creates Supabase Auth + stores LIS user in "users" table
       await createLISUser({
         firstName: data.first_name,
         lastName: data.last_name,
         dateOfBirth: data.date_of_birth,
+        email: data.email,
         status: data.status,
         course: data.course,
         faculty: data.faculty,
-        password: "Default123!",
+        password: "TempPass123!", // Temporary password
       });
 
       await onSave({
@@ -98,6 +116,9 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
       alert("Failed to save student.");
     }
   }
+
+  if (!user)
+    return <div className="p-10 text-center text-red-600">Your not logged in to add user</div>;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
@@ -141,6 +162,21 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
             )}
           </div>
 
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Email</label>
+            <input
+              {...register("email")}
+              className={`w-full border rounded-lg p-2 ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              }`}
+              placeholder="Enter email"
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+            )}
+          </div>
+
           {/* Date of Birth */}
           <div>
             <label className="block text-sm font-medium mb-1">Date of Birth</label>
@@ -152,7 +188,9 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
               }`}
             />
             {errors.date_of_birth && (
-              <p className="text-red-500 text-sm mt-1">{errors.date_of_birth.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.date_of_birth.message}
+              </p>
             )}
           </div>
 
@@ -222,3 +260,4 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
     </div>
   );
 }
+

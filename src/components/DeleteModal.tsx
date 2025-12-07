@@ -1,10 +1,5 @@
 import React, { useEffect, useRef } from "react";
-
-interface Student {
-  id: string;
-  name: string;
-  status?: "Active" | "Suspended"; // optional if not needed here
-}
+import type { Student } from "../hooks/types";
 
 interface DeleteModalProps {
   student: Student;
@@ -15,14 +10,12 @@ interface DeleteModalProps {
 export default function DeleteModal({ student, onClose, onDelete }: DeleteModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Close modal when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
         onClose();
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -34,7 +27,7 @@ export default function DeleteModal({ student, onClose, onDelete }: DeleteModalP
       <div ref={modalRef} className="bg-white rounded-lg w-96 p-6">
         <h3 className="text-xl font-bold mb-4">Confirm Delete</h3>
         <p className="mb-4">
-          Are you sure you want to delete <strong>{student.name}</strong>?
+          Are you sure you want to delete <strong>{student.first_name} {student.last_name}</strong>?
         </p>
         <div className="flex justify-end gap-3">
           <button

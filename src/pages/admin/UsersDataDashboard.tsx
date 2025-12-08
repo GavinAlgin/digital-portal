@@ -156,8 +156,7 @@ export default function StudentDashboard() {
           <h2 className="text-2xl font-bold">Students</h2>
           <button
             onClick={openAddModal}
-            className="bg-black text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
+            className="bg-black text-white px-4 py-2 rounded hover:bg-blue-700">
             + Add Student
           </button>
         </div>
@@ -246,7 +245,7 @@ export default function StudentDashboard() {
 
       {showDeleteModal && selectedStudent && (
         <DeleteModal
-          student={selectedStudent} // PASS FULL STUDENT OBJECT
+          student={selectedStudent} 
           onClose={() => setShowDeleteModal(false)}
           onDelete={() => deleteStudent(selectedStudent.id)}
         />

@@ -1,39 +1,5 @@
-import type { Student } from "../types";
-import { supabase } from "./supabaseClient";
+// src/hooks/supabase/createLISUser.ts
 
-// Fetch all students
-export async function fetchStudents() {
-  const { data, error } = await supabase
-    .from("users")
-    .select("*")
-    .eq("role", "student")
-    .order("created_at", { ascending: true });
-
-  return { data, error };
-}
-
-// Add a new student (table only)
-export async function addStudent(student: Student) {
-  const { data, error } = await supabase
-    .from("users")
-    .insert([
-      {
-        id_number: student.id_number,
-        first_name: student.first_name,
-        last_name: student.last_name,
-        email: student.email,
-        status: student.status,
-        course: student.course,
-        faculty: student.faculty,
-        role: "student",
-      },
-    ])
-    .select();
-
-  return { data, error };
-}
-
-// ---------------- NEW: Create LIS User ----------------
 export async function createLISUser(student: {
   firstName: string;
   lastName: string;
@@ -43,99 +9,165 @@ export async function createLISUser(student: {
   course: string;
   faculty: string;
   password: string;
+  coursePrefix: string;
 }) {
-  // 1️⃣ Create Supabase Auth user
-  const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-    email: student.email,
-    password: student.password,
-  });
-  if (authError) throw authError;
+  const res = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-lis-user`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(student),
+    }
+  );
 
-  const userId = authUser.user?.id;
-  if (!userId) throw new Error("Failed to create auth user");
+  const data = await res.json();
 
-  // 2️⃣ Insert into users table
-  const { error: insertError } = await supabase
-    .from("users")
-    .insert([
-      {
-        id: userId,
-        first_name: student.firstName,
-        last_name: student.lastName,
-        email: student.email,
-        status: student.status,
-        course: student.course,
-        faculty: student.faculty,
-        role: "student",
-      },
-    ]);
-  if (insertError) throw insertError;
-
-  // 3️⃣ Return created user
-  return authUser.user;
-}
-
-// Update student
-export async function updateStudent(student: Student) {
-  const { data, error } = await supabase
-    .from("users")
-    .update({
-      first_name: student.first_name,
-      last_name: student.last_name,
-      email: student.email,
-      status: student.status,
-      course: student.course,
-      faculty: student.faculty,
-    })
-    .eq("id_number", student.id_number)
-    .select();
-
-  return { data, error };
-}
-
-// Remove student
-export async function removeStudent(id_number: string) {
-  const { data, error } = await supabase
-    .from("users")
-    .delete()
-    .eq("id_number", id_number);
-
-  return { data, error };
-}
-
-// Toggle student status
-export async function toggleStudentStatus(student: Student) {
-  const newStatus = student.status === "Active" ? "Suspended" : "Active";
-  const { data, error } = await supabase
-    .from("users")
-    .update({ status: newStatus })
-    .eq("id_number", student.id_number)
-    .select();
-
-  return { data, error };
-}
-
-// Generate next student ID
-export async function generateStudentId(coursePrefix: string) {
-  const year = new Date().getFullYear().toString().slice(-2);
-  const pattern = `LIS-${coursePrefix}${year}%`;
-
-  const { data } = await supabase
-    .from("users")
-    .select("id_number")
-    .ilike("id_number", pattern)
-    .order("id_number", { ascending: false })
-    .limit(1);
-
-  let nextNum = 1;
-  if (data && data.length > 0) {
-    const lastId = data[0].id_number;
-    const lastNum = parseInt(lastId.split("-").pop() || "0");
-    nextNum = lastNum + 1;
+  if (!res.ok) {
+    throw new Error(data.error || "Failed to create LIS user");
   }
 
-  return `LIS-${coursePrefix}${year}-${String(nextNum).padStart(3, "0")}`;
+  return data; // { success: true, id, id_number }
 }
+
+
+// import type { Student } from "../types";
+// import { supabase } from "./supabaseClient";
+
+// // Fetch all students
+// export async function fetchStudents() {
+//   const { data, error } = await supabase
+//     .from("users")
+//     .select("*")
+//     .eq("role", "student")
+//     .order("created_at", { ascending: true });
+
+//   return { data, error };
+// }
+
+// // Add a new student (table only)
+// export async function addStudent(student: Student) {
+//   const { data, error } = await supabase
+//     .from("users")
+//     .insert([
+//       {
+//         id_number: student.id_number,
+//         first_name: student.first_name,
+//         last_name: student.last_name,
+//         email: student.email,
+//         status: student.status,
+//         course: student.course,
+//         faculty: student.faculty,
+//         role: "student",
+//       },
+//     ])
+//     .select();
+
+//   return { data, error };
+// }
+
+// // ---------------- NEW: Create LIS User ----------------
+// export async function createLISUser(student: {
+//   firstName: string;
+//   lastName: string;
+//   email: string;
+//   dateOfBirth: string;
+//   status: string;
+//   course: string;
+//   faculty: string;
+//   password: string;
+// }) {
+//   // 1️⃣ Create Supabase Auth user
+//   const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+//     email: student.email,
+//     password: student.password,
+//   });
+//   if (authError) throw authError;
+
+//   const userId = authUser.user?.id;
+//   if (!userId) throw new Error("Failed to create auth user");
+
+//   // 2️⃣ Insert into users table
+//   const { error: insertError } = await supabase
+//     .from("users")
+//     .insert([
+//       {
+//         id: userId,
+//         first_name: student.firstName,
+//         last_name: student.lastName,
+//         email: student.email,
+//         status: student.status,
+//         course: student.course,
+//         faculty: student.faculty,
+//         role: "student",
+//       },
+//     ]);
+//   if (insertError) throw insertError;
+
+//   // 3️⃣ Return created user
+//   return authUser.user;
+// }
+
+// // Update student
+// export async function updateStudent(student: Student) {
+//   const { data, error } = await supabase
+//     .from("users")
+//     .update({
+//       first_name: student.first_name,
+//       last_name: student.last_name,
+//       email: student.email,
+//       status: student.status,
+//       course: student.course,
+//       faculty: student.faculty,
+//     })
+//     .eq("id_number", student.id_number)
+//     .select();
+
+//   return { data, error };
+// }
+
+// // Remove student
+// export async function removeStudent(id_number: string) {
+//   const { data, error } = await supabase
+//     .from("users")
+//     .delete()
+//     .eq("id_number", id_number);
+
+//   return { data, error };
+// }
+
+// // Toggle student status
+// export async function toggleStudentStatus(student: Student) {
+//   const newStatus = student.status === "Active" ? "Suspended" : "Active";
+//   const { data, error } = await supabase
+//     .from("users")
+//     .update({ status: newStatus })
+//     .eq("id_number", student.id_number)
+//     .select();
+
+//   return { data, error };
+// }
+
+// // Generate next student ID
+// export async function generateStudentId(coursePrefix: string) {
+//   const year = new Date().getFullYear().toString().slice(-2);
+//   const pattern = `LIS-${coursePrefix}${year}%`;
+
+//   const { data } = await supabase
+//     .from("users")
+//     .select("id_number")
+//     .ilike("id_number", pattern)
+//     .order("id_number", { ascending: false })
+//     .limit(1);
+
+//   let nextNum = 1;
+//   if (data && data.length > 0) {
+//     const lastId = data[0].id_number;
+//     const lastNum = parseInt(lastId.split("-").pop() || "0");
+//     nextNum = lastNum + 1;
+//   }
+
+//   return `LIS-${coursePrefix}${year}-${String(nextNum).padStart(3, "0")}`;
+// }
 
 
 // import { supabase } from "./supabaseClient";

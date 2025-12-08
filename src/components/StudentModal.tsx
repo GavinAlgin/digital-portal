@@ -96,12 +96,13 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
       await createLISUser({
         firstName: data.first_name,
         lastName: data.last_name,
-        dateOfBirth: data.date_of_birth,
         email: data.email,
+        password: "TempPass123!",     // or generate one
+        dateOfBirth: data.date_of_birth,
         status: data.status,
         course: data.course,
         faculty: data.faculty,
-        password: "TempPass123!", // Temporary password
+        coursePrefix: data.course.substring(0, 2).toUpperCase(), // BSIT -> "BS"
       });
 
       await onSave({

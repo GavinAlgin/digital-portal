@@ -34,8 +34,7 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header
       id="page-header"
-      className="z-50 flex flex-none items-center border-b border-neutral-200/75 bg-white/90 backdrop-blur-xs lg:fixed lg:start-0 lg:end-0 lg:top-0 lg:h-20"
-    >
+      className="z-50 flex flex-none items-center border-b border-neutral-200/75 bg-white/90 backdrop-blur-xs lg:fixed lg:start-0 lg:end-0 lg:top-0 lg:h-20">
       <div className="container mx-auto px-4 lg:px-8 xl:max-w-7xl">
         <div className="flex justify-between py-5 lg:py-0">
 

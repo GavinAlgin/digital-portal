@@ -18,6 +18,6 @@ export interface Student {
   faculty:string;
   email: string;
   status: "Active" | "Suspended";
-  createdAt?: string;
+  created_at?: string;
 }
 

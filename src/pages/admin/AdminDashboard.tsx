@@ -28,7 +28,7 @@ const AdminDashboard = () => {
                 { label: "Users", href: "/admin/users" },
                 ]}
                 notificationsCount={3}
-                userName={user.name ?? user.email ?? "User"}
+                userName={user.first_name ?? user.email ?? "User"}
                 userProfileUrl="#"
             />
 
@@ -41,7 +41,7 @@ const AdminDashboard = () => {
                     <h1 className="mb-1 text-xl font-bold">Dashboard</h1>
                     <h2 className="text-sm font-medium text-neutral-500">
                     Welcome, you have <strong>5 open tickets</strong> and
-                    <strong>3 notifications</strong>.
+                    <strong> 3 notifications</strong>.
                     </h2>
                 </div>
                 <div

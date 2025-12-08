@@ -1,33 +1,53 @@
-// src/hooks/supabase/createLISUser.ts
+// src/hooks/supabase/createLisUser.ts
 
-export async function createLISUser(student: {
+interface LISUserPayload {
   firstName: string;
   lastName: string;
   email: string;
+  password: string;
   dateOfBirth: string;
-  status: string;
+  status: "Active" | "Suspended";
   course: string;
   faculty: string;
-  password: string;
-  coursePrefix: string;
-}) {
-  const res = await fetch(
-    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-lis-user`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(student),
-    }
-  );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error || "Failed to create LIS user");
-  }
-
-  return data; // { success: true, id, id_number }
+  coursePrefix: string; // Example: "BSIT"
 }
+
+interface LISUserResponse {
+  success: boolean;
+  id: string;
+  id_number: string;
+  error?: string;
+}
+
+/**
+ * Calls the Supabase Edge Function to create a LIS student.
+ */
+export async function createLISUser(student: LISUserPayload): Promise<LISUserResponse> {
+  try {
+    const res = await fetch(
+      "https://ddfapzvvniqameddqspf.supabase.co/functions/v1/create-lis-user",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(student),
+      }
+    );
+
+    const data: LISUserResponse = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Failed to create LIS user");
+    }
+
+    return data;
+  } catch (err: any) {
+    console.error("createLISUser error:", err);
+    throw new Error(err.message || "Failed to create LIS user");
+  }
+}
+
 
 
 // import type { Student } from "../types";

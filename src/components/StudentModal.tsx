@@ -38,6 +38,7 @@ type StudentFormData = z.infer<typeof StudentSchema>;
 export default function StudentModal({ student, onClose, onSave }: StudentModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -51,7 +52,7 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
     register,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<StudentFormData>({
     resolver: zodResolver(StudentSchema),
     defaultValues: {
@@ -91,20 +92,22 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
 
   /* ---------------- SUBMIT ---------------- */
   async function onSubmit(data: StudentFormData) {
+    setIsSubmitting(true);
     try {
-      // Creates Supabase Auth + stores LIS user in "users" table
+      // 1️⃣ Call Edge Function to create user
       await createLISUser({
         firstName: data.first_name,
         lastName: data.last_name,
         email: data.email,
-        password: "TempPass123!",     // or generate one
         dateOfBirth: data.date_of_birth,
         status: data.status,
         course: data.course,
         faculty: data.faculty,
-        coursePrefix: data.course.substring(0, 2).toUpperCase(), // BSIT -> "BS"
+        password: "TempPass123!",
+        coursePrefix: data.course.slice(0, 4).toUpperCase(),
       });
 
+      // 2️⃣ Call parent onSave to update local state / database
       await onSave({
         ...student,
         ...data,
@@ -114,12 +117,14 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
       onClose();
     } catch (err) {
       console.error(err);
-      alert("Failed to save student.");
+      alert((err as Error).message || "Failed to save student.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   if (!user)
-    return <div className="p-10 text-center text-red-600">Your not logged in to add user</div>;
+    return <div className="p-10 text-center text-red-600">You are not logged in to add users.</div>;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
@@ -132,7 +137,6 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
         </h3>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          
           {/* First Name */}
           <div>
             <label className="block text-sm font-medium mb-1">First Name</label>
@@ -189,9 +193,7 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
               }`}
             />
             {errors.date_of_birth && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.date_of_birth.message}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{errors.date_of_birth.message}</p>
             )}
           </div>
 
@@ -261,4 +263,3 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
     </div>
   );
 }
-

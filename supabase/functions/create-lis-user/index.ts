@@ -1,98 +1,126 @@
-// Deno (Supabase Edge Function)
+// supabase/functions/create-lis-user/index.ts
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+interface CreateLISUserBody {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  dateOfBirth: string;
+  status: "Active" | "Suspended";
+  course: string;
+  faculty: string;
+  coursePrefix: string;
+}
 
 serve(async (req: Request) => {
-  if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+  // 1️⃣ Handle preflight (CORS)
+  if (req.method === "OPTIONS") {
+    return corsResponse({}, 204);
   }
 
-  const body = await req.json();
+  try {
+    if (req.method !== "POST") {
+      return corsResponse({ error: "Method not allowed" }, 405);
+    }
 
-  const {
-    firstName,
-    lastName,
-    email,
-    password,
-    dateOfBirth,
-    status,
-    course,
-    faculty,
-    coursePrefix,
-  } = body;
+    const body: CreateLISUserBody = await req.json();
 
-  // Load secure environment variables
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      dateOfBirth,
+      status,
+      course,
+      faculty,
+      coursePrefix,
+    } = body;
 
-  // 1) Create Auth user
-  const { data: authUser, error: authError } =
-    await supabase.auth.admin.createUser({
+    // 2️⃣ Supabase Service Role client
+    const supabase: SupabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    // 3️⃣ Create Auth user
+    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
     });
 
-  if (authError) {
-    return new Response(JSON.stringify({ error: authError.message }), {
-      status: 400,
-    });
-  }
+    if (authError || !authUser?.user) {
+      return corsResponse({ error: authError?.message || "Failed to create user" }, 400);
+    }
 
-  const userId = authUser.user.id;
+    const userId = authUser.user.id;
 
-  // 2) Generate student ID (same as your frontend code)
-  const year = new Date().getFullYear().toString().slice(-2);
-  const pattern = `LIS-${coursePrefix}${year}%`;
+    // 4️⃣ Generate unique student ID
+    const year = new Date().getFullYear().toString().slice(-2);
+    const pattern = `LIS-${coursePrefix}${year}%`;
 
-  const { data: lastIdRow } = await supabase
-    .from("users")
-    .select("id_number")
-    .ilike("id_number", pattern)
-    .order("id_number", { ascending: false })
-    .limit(1);
+    const { data: lastIdRow } = await supabase
+      .from("users")
+      .select("id_number")
+      .ilike("id_number", pattern)
+      .order("id_number", { ascending: false })
+      .limit(1);
 
-  let nextNum = 1;
+    let nextNum = 1;
+    if (lastIdRow?.[0]?.id_number) {
+      const lastId = lastIdRow[0].id_number;
+      const lastNum = parseInt(lastId.split("-").pop() || "0");
+      nextNum = lastNum + 1;
+    }
 
-  if (lastIdRow && lastIdRow.length > 0) {
-    const lastId = lastIdRow[0].id_number;
-    const lastNum = parseInt(lastId.split("-").pop() || "0");
-    nextNum = lastNum + 1;
-  }
+    const id_number = `LIS-${coursePrefix}${year}-${String(nextNum).padStart(3, "0")}`;
 
-  const id_number = `LIS-${coursePrefix}${year}-${String(nextNum).padStart(3, "0")}`;
-
-  // 3) Insert full student profile
-  const { error: insertError } = await supabase.from("users").insert({
-    id: userId,
-    id_number,
-    first_name: firstName,
-    last_name: lastName,
-    email,
-    date_of_birth: dateOfBirth,
-    status,
-    course,
-    faculty,
-    role: "student",
-  });
-
-  if (insertError) {
-    return new Response(JSON.stringify({ error: insertError.message }), {
-      status: 400,
-    });
-  }
-
-  return new Response(
-    JSON.stringify({
-      success: true,
-      id_number,
+    // 5️⃣ Insert into users table
+    const { error: insertError } = await supabase.from("users").insert({
       id: userId,
-    }),
-    { status: 200 },
-  );
+      id_number,
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      date_of_birth: dateOfBirth,
+      status,
+      course,
+      faculty,
+      role: "student",
+    });
+
+    if (insertError) return corsResponse({ error: insertError.message }, 400);
+
+    // 6️⃣ Success response
+    return corsResponse({
+      success: true,
+      id: userId,
+      id_number,
+    });
+  } catch (error: any) {
+    console.error("Edge Function Error:", error);
+    return corsResponse({ error: error.message || "Internal Server Error" }, 500);
+  }
 });
+
+// ----------------- Helper: CORS Response -----------------
+function corsResponse(body: any, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      "Access-Control-Allow-Origin": "*", // adjust for production domains
+      "Access-Control-Allow-Headers":
+        "authorization, x-client-info, apikey, content-type",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+
 
 
 // Follow this setup guide to integrate the Deno language server with your editor:

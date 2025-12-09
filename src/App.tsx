@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from "./hooks/context/AuthContext";
 import ProtectedRoute from "./hooks/routes/ProtectedRoute";
 import UsersDataDashboard from "./pages/admin/UsersDataDashboard";
 import EventDashboard from "./pages/admin/EventDashboard";
+import RegistrationForm from "./components/RegisterForm";
 
 function AppRoutes() {
   const { isAuthenticated, role } = useAuth();
@@ -66,6 +67,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <UsersDataDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/register"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <RegistrationForm />
           </ProtectedRoute>
         }
       />

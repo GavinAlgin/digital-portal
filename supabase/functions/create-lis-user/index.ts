@@ -1,64 +1,49 @@
 // supabase/functions/create-lis-user/index.ts
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-interface CreateLISUserBody {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  dateOfBirth: string;
-  status: "Active" | "Suspended";
-  course: string;
-  faculty: string;
-  coursePrefix: string;
-}
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 serve(async (req: Request) => {
-  // 1️⃣ Handle preflight (CORS)
+  // Handle preflight CORS
   if (req.method === "OPTIONS") {
-    return corsResponse({}, 204);
+    return new Response("ok", {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+      },
+    });
   }
 
   try {
-    if (req.method !== "POST") {
-      return corsResponse({ error: "Method not allowed" }, 405);
-    }
+    // 🔹 Log the environment variables
+    console.log("SUPABASE_URL:", Deno.env.get("SUPABASE_URL"));
+    console.log("SERVICE_ROLE_KEY exists:", !!Deno.env.get("SERVICE_ROLE_KEY"));
 
-    const body: CreateLISUserBody = await req.json();
+    const body = await req.json();
+    const { firstName, lastName, email, password, dateOfBirth, status, course, faculty, coursePrefix } = body;
 
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      dateOfBirth,
-      status,
-      course,
-      faculty,
-      coursePrefix,
-    } = body;
-
-    // 2️⃣ Supabase Service Role client
-    const supabase: SupabaseClient = createClient(
+    const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get("SERVICE_ROLE_KEY")!
     );
 
-    // 3️⃣ Create Auth user
+    // 🔹 Test the client by fetching some info
+    const { data: testData, error: testError } = await supabase.from("users").select("*").limit(1);
+    if (testError) console.log("Supabase test query error:", testError.message);
+    else console.log("Supabase test query success:", testData);
+
+    // 1️⃣ Create Auth user
     const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
     });
 
-    if (authError || !authUser?.user) {
-      return corsResponse({ error: authError?.message || "Failed to create user" }, 400);
-    }
+    if (authError) return corsResponse({ error: authError.message }, 400);
 
     const userId = authUser.user.id;
 
-    // 4️⃣ Generate unique student ID
+    // 2️⃣ Generate custom ID number
     const year = new Date().getFullYear().toString().slice(-2);
     const pattern = `LIS-${coursePrefix}${year}%`;
 
@@ -70,7 +55,7 @@ serve(async (req: Request) => {
       .limit(1);
 
     let nextNum = 1;
-    if (lastIdRow?.[0]?.id_number) {
+    if (lastIdRow?.[0]) {
       const lastId = lastIdRow[0].id_number;
       const lastNum = parseInt(lastId.split("-").pop() || "0");
       nextNum = lastNum + 1;
@@ -78,7 +63,7 @@ serve(async (req: Request) => {
 
     const id_number = `LIS-${coursePrefix}${year}-${String(nextNum).padStart(3, "0")}`;
 
-    // 5️⃣ Insert into users table
+    // 3️⃣ Insert into users table
     const { error: insertError } = await supabase.from("users").insert({
       id: userId,
       id_number,
@@ -94,26 +79,20 @@ serve(async (req: Request) => {
 
     if (insertError) return corsResponse({ error: insertError.message }, 400);
 
-    // 6️⃣ Success response
-    return corsResponse({
-      success: true,
-      id: userId,
-      id_number,
-    });
+    return corsResponse({ success: true, id: userId, id_number });
+
   } catch (error: any) {
-    console.error("Edge Function Error:", error);
-    return corsResponse({ error: error.message || "Internal Server Error" }, 500);
+    console.error("Function error:", error.message);
+    return corsResponse({ error: error.message }, 500);
   }
 });
 
-// ----------------- Helper: CORS Response -----------------
 function corsResponse(body: any, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
-      "Access-Control-Allow-Origin": "*", // adjust for production domains
-      "Access-Control-Allow-Headers":
-        "authorization, x-client-info, apikey, content-type",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
       "Content-Type": "application/json",
     },

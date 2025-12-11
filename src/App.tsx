@@ -7,6 +7,7 @@ import ProtectedRoute from "./hooks/routes/ProtectedRoute";
 import UsersDataDashboard from "./pages/admin/UsersDataDashboard";
 import EventDashboard from "./pages/admin/EventDashboard";
 import RegistrationForm from "./components/RegisterForm";
+import ForgotPassword from "./components/reset-password/ForgotPassword";
 
 function AppRoutes() {
   const { isAuthenticated, role } = useAuth();
@@ -42,6 +43,14 @@ function AppRoutes() {
           ) : (
             <Login />
           )
+        }
+      />
+
+      {/** URL */}
+      <Route
+        path="/forgot-password"
+        element={
+          <ForgotPassword />
         }
       />
 

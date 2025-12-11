@@ -132,7 +132,7 @@ export default function Login() {
           />
 
           <Link
-            to=""
+            to="/forgot-password"
             className="text-sm text-[#BFD1FF] hover:underline text-right">
             Forgot Password?
           </Link>

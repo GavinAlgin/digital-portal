@@ -53,6 +53,18 @@ function AppRoutes() {
           <ForgotPassword />
         }
       />
+      <Route
+        path="/reset-password"
+        element={
+          <ForgotPassword />
+        }
+      />
+      <Route
+        path="/support-form"
+        element={
+          <ForgotPassword />
+        }
+      />
 
       {/* Admin Protected Route */}
       <Route

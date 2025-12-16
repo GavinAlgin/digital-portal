@@ -8,6 +8,7 @@ import UsersDataDashboard from "./pages/admin/UsersDataDashboard";
 import EventDashboard from "./pages/admin/EventDashboard";
 import RegistrationForm from "./components/RegisterForm";
 import ForgotPassword from "./components/reset-password/ForgotPassword";
+// import AccommodationForm from "./components/Form/AccommodationForm";
 
 function AppRoutes() {
   const { isAuthenticated, role } = useAuth();
@@ -59,12 +60,12 @@ function AppRoutes() {
           <ForgotPassword />
         }
       />
-      <Route
+      {/* <Route
         path="/support-form"
         element={
-          <ForgotPassword />
+          <AccommodationForm />
         }
-      />
+      /> */}
 
       {/* Admin Protected Route */}
       <Route

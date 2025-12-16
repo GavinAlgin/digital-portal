@@ -79,6 +79,34 @@ export default function Index() {
           {/* REAL Supabase User Data */}
           <StudentCard user={userData!} />
 
+          <div className="p-4 bg-gray-200 rounded-lg mt-6 flex items-center gap-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-10 h-10 text-gray-700">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+              />
+            </svg>
+
+            <div>
+              <h3 className="text-base font-semibold text-gray-900">
+                Student card expiration date
+              </h3>
+              <p className="text-sm text-gray-600">
+                01-01-2026 | 01-01-2027
+              </p>
+            </div>
+          </div>
+
+          <p className="text-center text-blue-600 underline mt-4">Accommodation Form</p>
+
+
           <ActiveClasses />
         </div>
       </main>

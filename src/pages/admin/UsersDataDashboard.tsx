@@ -74,7 +74,7 @@ export default function UserDashboard() {
         ]}
         notificationsCount={3}
         userName={user.first_name ?? user.email ?? "User"}
-        userProfileUrl="https://avatar.iran.liara.run/username?username=[firstname+lastname]"
+        userProfileUrl={`https://avatar.iran.liara.run/username?username=${user.first_name}+${user.last_name}`}
       />
 
       {/* BODY */}

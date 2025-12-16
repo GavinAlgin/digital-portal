@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import ActiveClasses from "../components/ListAction";
 import StudentCard from "../components/StudentCard";
@@ -104,7 +104,7 @@ export default function Index() {
             </div>
           </div>
 
-          <p className="text-center text-blue-600 underline mt-4">Accommodation Form</p>
+          <Link to="/user/accommodation" className="flex justify-center align-middle text-blue-600 underline mt-4">Accommodation Form</Link>
 
 
           <ActiveClasses />

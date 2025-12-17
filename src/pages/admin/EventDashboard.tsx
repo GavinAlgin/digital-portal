@@ -79,7 +79,7 @@ export default function TicketsPage() {
                 userName="Gavin Algin"
                 userProfileUrl="https://avatar.iran.liara.run/username?username=[firstname+lastname]"
             />
-          <div className="grow">
+          <div className="grow mt-18">
             <h1 className="mb-1 text-xl font-bold">Tickets</h1>
             <h2 className="text-sm font-medium text-neutral-500">
               View, manage and respond to all support tickets.
@@ -87,7 +87,7 @@ export default function TicketsPage() {
           </div>
 
           {/* Search */}
-          <div className="relative">
+          <div className="relative mt-18">
             <div className="pointer-events-none absolute inset-y-0 start-0 my-px ms-px flex w-10 items-center justify-center rounded-l-lg text-neutral-500">
               <svg
                 className="hi-mini hi-magnifying-glass inline-block size-5"

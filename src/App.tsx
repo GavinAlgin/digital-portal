@@ -11,6 +11,7 @@ import ForgotPassword from "./components/reset-password/ForgotPassword";
 import AccommodationForm from "./pages/users/AccommodationForm";
 import SupportForm from "./pages/SupportForm";
 import Profile from "./pages/users/ProfilePage";
+import SignupConfirmed from "./pages/ConfirmationPage";
 
 function AppRoutes() {
   const { isAuthenticated, role } = useAuth();
@@ -66,6 +67,12 @@ function AppRoutes() {
         path="/support-form"
         element={
           <SupportForm />
+        }
+      />
+      <Route
+        path="/signup-confirmation"
+        element={
+          <SignupConfirmed />
         }
       />
 

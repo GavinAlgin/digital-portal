@@ -121,12 +121,12 @@ export default function Index() {
           Log Out
         </button>
 
-        <button
+        <Link to="https://listec.moodlecloud.com/login/index.php" 
           className="w-full py-3 rounded-xl flex justify-center items-center gap-2 transition"
           style={{ backgroundColor: "#FFFFFF20", color: "black" }}>
           <img src={moodlelogo} className="h-5 rounded-md" />
           Continue To Moodle
-        </button>
+        </Link>
       </div>
     </div>
   );

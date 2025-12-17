@@ -77,7 +77,7 @@ export default function TicketsPage() {
                 ]}
                 notificationsCount={3}
                 userName="Gavin Algin"
-                userProfileUrl="https://avatar.iran.liara.run/username?username=[firstname+lastname]"
+                userProfileUrl={`https://avatar.iran.liara.run/username?username=${user.first_name}+${user.last_name}`}
             />
           <div className="grow mt-18">
             <h1 className="mb-1 text-xl font-bold">Tickets</h1>

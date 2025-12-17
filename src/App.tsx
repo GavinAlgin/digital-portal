@@ -8,6 +8,9 @@ import UsersDataDashboard from "./pages/admin/UsersDataDashboard";
 import EventDashboard from "./pages/admin/EventDashboard";
 import RegistrationForm from "./components/RegisterForm";
 import ForgotPassword from "./components/reset-password/ForgotPassword";
+import AccommodationForm from "./pages/users/AccommodationForm";
+import SupportForm from "./pages/SupportForm";
+import Profile from "./pages/users/ProfilePage";
 
 function AppRoutes() {
   const { isAuthenticated, role } = useAuth();
@@ -62,7 +65,7 @@ function AppRoutes() {
       <Route
         path="/support-form"
         element={
-          <ForgotPassword />
+          <SupportForm />
         }
       />
 
@@ -106,6 +109,22 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["user"]}>
             <UserDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/user/accommodation"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <AccommodationForm />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/user/profile"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <Profile />
           </ProtectedRoute>
         }
       />

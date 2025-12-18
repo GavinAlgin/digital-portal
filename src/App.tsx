@@ -5,7 +5,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import { AuthProvider, useAuth } from "./hooks/context/AuthContext";
 import ProtectedRoute from "./hooks/routes/ProtectedRoute";
 import UsersDataDashboard from "./pages/admin/UsersDataDashboard";
-import EventDashboard from "./pages/admin/EventDashboard";
+// import EventDashboard from "./pages/admin/EventDashboard";
 import RegistrationForm from "./components/RegisterForm";
 import ForgotPassword from "./components/reset-password/ForgotPassword";
 import AccommodationForm from "./pages/users/AccommodationForm";
@@ -85,14 +85,14 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route
+      {/* <Route
         path="/admin/tickets"
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <EventDashboard />
           </ProtectedRoute>
         }
-      />
+      /> */}
       <Route
         path="/admin/users"
         element={

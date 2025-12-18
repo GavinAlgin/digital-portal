@@ -79,7 +79,7 @@ const AccommodationForm = () => {
     }
 
     const { error } = await supabase
-      .from('accommodation_requests')
+      .from('accommodations')
       .insert([validation.data])
 
     if (error) {

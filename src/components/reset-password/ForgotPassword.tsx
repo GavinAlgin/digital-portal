@@ -76,9 +76,9 @@ export default function ForgotPassword() {
         </form>
 
         <p className={signupLink}>
-          Don’t have an account?
-          <a href="/signup" className="text-blue-600 hover:underline ml-1">
-            Sign up now
+          Go back to login
+          <a href="/" className="text-blue-600 hover:underline ml-1">
+            Login Now
           </a>
         </p>
       </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -94,7 +94,6 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
   async function onSubmit(data: StudentFormData) {
     setIsSubmitting(true);
     try {
-      // 1️⃣ Call Edge Function to create user
       await createLISUser({
         firstName: data.first_name,
         lastName: data.last_name,
@@ -103,13 +102,13 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
         status: data.status,
         course: data.course,
         faculty: data.faculty,
-        password: "TempPass123!",
+        facultyPrefix: data.faculty.slice(0, 4).toUpperCase(), // ✅ ADD THIS
         coursePrefix: data.course.slice(0, 4).toUpperCase(),
+        password: "TempPass123!",
       });
 
-      // 2️⃣ Call parent onSave to update local state / database
       await onSave({
-        ...student,
+        ...(student ?? {}),
         ...data,
       });
 
@@ -122,6 +121,38 @@ export default function StudentModal({ student, onClose, onSave }: StudentModalP
       setIsSubmitting(false);
     }
   }
+
+  // async function onSubmit(data: StudentFormData) {
+  //   setIsSubmitting(true);
+  //   try {
+  //     // 1️⃣ Call Edge Function to create user
+  //     await createLISUser({
+  //       firstName: data.first_name,
+  //       lastName: data.last_name,
+  //       email: data.email,
+  //       dateOfBirth: data.date_of_birth,
+  //       status: data.status,
+  //       course: data.course,
+  //       faculty: data.faculty,
+  //       password: "TempPass123!",
+  //       coursePrefix: data.course.slice(0, 4).toUpperCase(),
+  //     });
+
+  //     // 2️⃣ Call parent onSave to update local state / database
+  //     await onSave({
+  //       ...student,
+  //       ...data,
+  //     });
+
+  //     alert("Student successfully saved.");
+  //     onClose();
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert((err as Error).message || "Failed to save student.");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // }
 
   if (!user)
     return <div className="p-10 text-center text-red-600">You are not logged in to add users.</div>;

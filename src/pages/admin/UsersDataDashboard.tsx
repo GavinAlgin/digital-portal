@@ -5,18 +5,18 @@ import { useNavigate } from "react-router-dom";
 import { getCurrentUser, type User } from "../../hooks/context/AdminLogged";
 import { supabase } from "../../hooks/supabase/supabaseClient";
 
-
-type Student = {
+type AppUser = {
   id: string;
-  studentId: string;
+  role: string; // "student" or "staff"
+  userId: string;
   fullName: string;
   email: string;
-  program: string;
+  program?: string;
 };
 
 export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
-  const [students, setStudents] = useState<Student[]>([]);
+  const [users, setUsers] = useState<AppUser[]>([]);
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
 
@@ -31,31 +31,33 @@ export default function UserDashboard() {
 
   // FETCH USERS FROM SUPABASE
   useEffect(() => {
-    const fetchStudents = async () => {
+    const fetchUsers = async () => {
+      setLoading(true);
       const { data, error } = await supabase
         .from("users")
-        .select("id, id_number, first_name, last_name, email, course");
+        .select("id, id_number, first_name, last_name, email, course, role")
+        .in("role", ["student", "staff"]); // Only students or staff
 
       if (error) {
-        console.error("Error fetching students:", error);
+        console.error("Error fetching users:", error);
         setLoading(false);
         return;
       }
 
-      // Format data for your table
-      const formatted = data.map((s) => ({
-        id: s.id,
-        studentId: s.id_number,
-        fullName: `${s.first_name} ${s.last_name}`,
-        email: s.email,
-        program: s.course,
+      const formatted = data.map((u) => ({
+        id: u.id,
+        role: u.role,
+        userId: u.id_number,
+        fullName: `${u.first_name} ${u.last_name}`,
+        email: u.email,
+        program: u.course ?? "",
       }));
 
-      setStudents(formatted);
+      setUsers(formatted);
       setLoading(false);
     };
 
-    fetchStudents();
+    fetchUsers();
   }, []);
 
   if (!user) return <p>Loading or not logged in...</p>;
@@ -84,20 +86,20 @@ export default function UserDashboard() {
           {/* Page Header */}
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-2xl font-bold">Manage Students</h1>
+              <h1 className="text-2xl font-bold">Manage Users</h1>
               <p className="text-neutral-500 text-sm">
-                Add, view, and manage registered students.
+                View and manage all students and staff.
               </p>
             </div>
 
             <button
               onClick={() => navigate('/admin/register')}
               className="rounded-lg bg-neutral-800 px-4 py-2 font-semibold text-white hover:bg-neutral-700">
-              + Add Student
+              + Add User
             </button>
           </div>
 
-          {/* Loading */}
+          {/* Loading Spinner */}
           {loading ? (
             <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-neutral-800"></div>
@@ -107,44 +109,33 @@ export default function UserDashboard() {
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b border-neutral-200 bg-neutral-50">
-                    <th className="px-4 py-3 text-left font-semibold text-neutral-700 uppercase">
-                      Student ID
-                    </th>
-                    <th className="px-4 py-3 text-left font-semibold text-neutral-700 uppercase">
-                      Full Name
-                    </th>
-                    <th className="px-4 py-3 text-left font-semibold text-neutral-700 uppercase">
-                      Email
-                    </th>
-                    <th className="px-4 py-3 text-left font-semibold text-neutral-700 uppercase">
-                      Program
-                    </th>
-                    <th className="px-4 py-3 text-right font-semibold text-neutral-700 uppercase">
-                      Actions
-                    </th>
+                    <th className="px-4 py-3 text-left font-semibold text-neutral-700 uppercase">User ID</th>
+                    <th className="px-4 py-3 text-left font-semibold text-neutral-700 uppercase">Full Name</th>
+                    <th className="px-4 py-3 text-left font-semibold text-neutral-700 uppercase">Email</th>
+                    <th className="px-4 py-3 text-left font-semibold text-neutral-700 uppercase">Program / Role</th>
+                    <th className="px-4 py-3 text-right font-semibold text-neutral-700 uppercase">Actions</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {students.length === 0 ? (
+                  {users.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="py-6 text-center text-neutral-500">
-                        No students found.
+                      <td colSpan={5} className="py-6 text-center text-neutral-500">
+                        No users found.
                       </td>
                     </tr>
                   ) : (
-                    students.map((student) => (
-                      <tr
-                        key={student.id}
-                        className="border-b border-neutral-100 hover:bg-neutral-50">
-                        <td className="px-4 py-3 font-medium">{student.studentId}</td>
-                        <td className="px-4 py-3">{student.fullName}</td>
-                        <td className="px-4 py-3">{student.email}</td>
-                        <td className="px-4 py-3">{student.program}</td>
-
+                    users.map((u) => (
+                      <tr key={u.id} className="border-b border-neutral-100 hover:bg-neutral-50">
+                        <td className="px-4 py-3 font-medium">{u.userId}</td>
+                        <td className="px-4 py-3">{u.fullName}</td>
+                        <td className="px-4 py-3">{u.email}</td>
+                        <td className="px-4 py-3">{u.role === "student" ? u.program : u.role}</td>
                         <td className="px-4 py-3 text-right">
                           <button className="rounded-md px-3 py-1 text-sm border hover:bg-neutral-100">
-                            Edit
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+                            </svg>
                           </button>
                         </td>
                       </tr>
@@ -159,6 +150,169 @@ export default function UserDashboard() {
     </>
   );
 }
+
+
+// import { useEffect, useState } from "react";
+// import ListecLogo from "../../assets/cropped-flyer-02102024-133x133.png";
+// import Header from "./components/Header";
+// import { useNavigate } from "react-router-dom";
+// import { getCurrentUser, type User } from "../../hooks/context/AdminLogged";
+// import { supabase } from "../../hooks/supabase/supabaseClient";
+
+
+// type Student = {
+//   id: string;
+//   studentId: string;
+//   fullName: string;
+//   email: string;
+//   program: string;
+// };
+
+// export default function UserDashboard() {
+//   const [loading, setLoading] = useState(true);
+//   const [students, setStudents] = useState<Student[]>([]);
+//   const navigate = useNavigate();
+//   const [user, setUser] = useState<User | null>(null);
+
+//   // FETCH LOGGED-IN USER
+//   useEffect(() => {
+//     const fetchUser = async () => {
+//       const loggedUser = await getCurrentUser();
+//       setUser(loggedUser);
+//     };
+//     fetchUser();
+//   }, []);
+
+//   // FETCH USERS FROM SUPABASE
+//   useEffect(() => {
+//     const fetchStudents = async () => {
+//       const { data, error } = await supabase
+//         .from("users")
+//         .select("id, id_number, first_name, last_name, email, course");
+
+//       if (error) {
+//         console.error("Error fetching students:", error);
+//         setLoading(false);
+//         return;
+//       }
+
+//       // Format data for your table
+//       const formatted = data.map((s) => ({
+//         id: s.id,
+//         studentId: s.id_number,
+//         fullName: `${s.first_name} ${s.last_name}`,
+//         email: s.email,
+//         program: s.course,
+//       }));
+
+//       setStudents(formatted);
+//       setLoading(false);
+//     };
+
+//     fetchStudents();
+//   }, []);
+
+//   if (!user) return <p>Loading or not logged in...</p>;
+
+//   return (
+//     <>
+//       {/* HEADER */}
+//       <Header
+//         logo={ListecLogo}
+//         logoText="LISTEC"
+//         navItems={[
+//           { label: "Dashboard", href: "/admin" },
+//           { label: "Tickets", href: "/admin/tickets" },
+//           { label: "Reports", href: "#" },
+//           { label: "Users", href: "/admin/users" },
+//         ]}
+//         notificationsCount={3}
+//         userName={user.first_name ?? user.email ?? "User"}
+//         userProfileUrl="https://avatar.iran.liara.run/username?username=[firstname+lastname]"
+//       />
+
+//       {/* BODY */}
+//       <main id="page-content" className="flex max-w-full flex-auto flex-col pt-24">
+//         <div className="container mx-auto p-4 lg:p-8 xl:max-w-7xl">
+
+//           {/* Page Header */}
+//           <div className="flex justify-between items-center mb-6">
+//             <div>
+//               <h1 className="text-2xl font-bold">Manage Students</h1>
+//               <p className="text-neutral-500 text-sm">
+//                 Add, view, and manage registered students.
+//               </p>
+//             </div>
+
+//             <button
+//               onClick={() => navigate('/admin/register')}
+//               className="rounded-lg bg-neutral-800 px-4 py-2 font-semibold text-white hover:bg-neutral-700">
+//               + Add Student
+//             </button>
+//           </div>
+
+//           {/* Loading */}
+//           {loading ? (
+//             <div className="flex justify-center items-center py-20">
+//               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-neutral-800"></div>
+//             </div>
+//           ) : (
+//             <div className="rounded-lg border border-neutral-200 bg-white shadow-sm">
+//               <table className="min-w-full text-sm">
+//                 <thead>
+//                   <tr className="border-b border-neutral-200 bg-neutral-50">
+//                     <th className="px-4 py-3 text-left font-semibold text-neutral-700 uppercase">
+//                       Student ID
+//                     </th>
+//                     <th className="px-4 py-3 text-left font-semibold text-neutral-700 uppercase">
+//                       Full Name
+//                     </th>
+//                     <th className="px-4 py-3 text-left font-semibold text-neutral-700 uppercase">
+//                       Email
+//                     </th>
+//                     <th className="px-4 py-3 text-left font-semibold text-neutral-700 uppercase">
+//                       Program
+//                     </th>
+//                     <th className="px-4 py-3 text-right font-semibold text-neutral-700 uppercase">
+//                       Actions
+//                     </th>
+//                   </tr>
+//                 </thead>
+
+//                 <tbody>
+//                   {students.length === 0 ? (
+//                     <tr>
+//                       <td colSpan="5" className="py-6 text-center text-neutral-500">
+//                         No students found.
+//                       </td>
+//                     </tr>
+//                   ) : (
+//                     students.map((student) => (
+//                       <tr
+//                         key={student.id}
+//                         className="border-b border-neutral-100 hover:bg-neutral-50">
+//                         <td className="px-4 py-3 font-medium">{student.studentId}</td>
+//                         <td className="px-4 py-3">{student.fullName}</td>
+//                         <td className="px-4 py-3">{student.email}</td>
+//                         <td className="px-4 py-3">{student.program}</td>
+
+//                         <td className="px-4 py-3 text-right">
+//                           <button className="rounded-md px-3 py-1 text-sm border hover:bg-neutral-100">
+//                             Edit
+//                           </button>
+//                         </td>
+//                       </tr>
+//                     ))
+//                   )}
+//                 </tbody>
+//               </table>
+//             </div>
+//           )}
+//         </div>
+//       </main>
+//     </>
+//   );
+// }
 
 
 

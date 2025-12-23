@@ -1,5 +1,5 @@
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Student } from "../hooks/types";
 
 

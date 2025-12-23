@@ -49,7 +49,7 @@ const DataTable: React.FC<DataTableProps> = ({
           {loading &&
             Array.from({ length: 5 }).map((_, i) => (
               <tr key={`loading-${i}`} className="animate-pulse">
-                {columns.map((col, i2) => (
+                {columns.map((_, i2) => (
                   <td key={i2} className="p-3">
                     <div className="h-4 w-24 bg-neutral-200 rounded"></div>
                   </td>

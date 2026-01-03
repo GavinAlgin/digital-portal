@@ -1,107 +1,169 @@
-import React from "react";
+"use client"
 
-export interface TableColumn {
-  key: string;
-  label: string;
-  className?: string;
+import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
+import { userColumns, type AppUser } from "./types/Column"
+import { useState } from "react"
+import EditStudentModal from "../../../components/EditModal"
+import DeleteStudentModal from "../../../components/DeleteModal"
+// import DeleteStudentModal from "../modals/DeleteStudentModal"
+// import EditStudentModal from "../modals/EditStudentModal"
+
+interface Props {
+  data: AppUser[]
+  loading: boolean
+  page: number
+  pageSize: number
+  total: number
+  onPageChange: (page: number) => void
 }
 
-export interface TableRow {
-  id: string;
-  date: string;
-  user: string;
-  title: string;
-  status: string;
-  statusColor?: string;
-}
+export default function UserTable({
+  data,
+  loading,
+  page,
+  pageSize,
+  total,
+  onPageChange,
+}: Props) {
+  const [selectedUser, setSelectedUser] = useState<AppUser | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
-interface DataTableProps {
-  columns: TableColumn[];
-  rows: TableRow[];
-  loading?: boolean;
-  onViewClick?: (row: TableRow) => void;
-}
+  const table = useReactTable({
+    data,
+    columns: userColumns(
+      user => {
+        console.log("View", user)
+      },
+      user => {
+        setSelectedUser(user)
+        setEditOpen(true)
+      },
+      user => {
+        setSelectedUser(user)
+        setDeleteOpen(true)
+      }
+    ),
+    manualPagination: true,
+    pageCount: Math.ceil(total / pageSize),
+    getCoreRowModel: getCoreRowModel(),
+  })
 
-const DataTable: React.FC<DataTableProps> = ({
-  columns,
-  rows,
-  loading = false,
-  onViewClick
-}) => {
   return (
-    <div className="min-w-full overflow-x-auto rounded-sm border border-neutral-200">
-      <table className="min-w-full align-middle text-sm">
-        <thead>
-          <tr className="border-b-2 border-neutral-100 bg-neutral-50">
-            {columns.map((col) => (
-              <th
-                key={col.key}
-                className={`px-3 py-2 text-start text-sm font-semibold tracking-wider text-neutral-700 uppercase ${col.className || ""}`}
-              >
-                {col.label}
-              </th>
-            ))}
-          </tr>
+    <div className="relative overflow-x-auto rounded-lg bg-white">
+      {/* Search */}
+      <div className="p-4">
+        <div className="relative max-w-sm">
+          <input
+            type="text"
+            placeholder="Search users"
+            className="block w-full bg-gray-100/35 rounded py-2 pl-9 pr-3 text-sm focus:outline-none"
+          />
+        </div>
+      </div>
+
+      {/* Table */}
+      <table className="w-full text-left text-sm text-black">
+        <thead className="bg-gray-100/35">
+          {table.getHeaderGroups().map(hg => (
+            <tr key={hg.id}>
+              {hg.headers.map(header => (
+                <th
+                  key={header.id}
+                  className="px-6 py-3 font-semibold uppercase"
+                >
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
+                </th>
+              ))}
+            </tr>
+          ))}
         </thead>
 
         <tbody>
-          {/* Loading Skeleton */}
-          {loading &&
-            Array.from({ length: 5 }).map((_, i) => (
-              <tr key={`loading-${i}`} className="animate-pulse">
-                {columns.map((_, i2) => (
-                  <td key={i2} className="p-3">
-                    <div className="h-4 w-24 bg-neutral-200 rounded"></div>
+          {loading && (
+            <tr>
+              <td colSpan={6} className="py-10 text-center">
+                Loading users...
+              </td>
+            </tr>
+          )}
+
+          {!loading &&
+            table.getRowModel().rows.map(row => (
+              <tr key={row.id} className="hover:bg-gray-100">
+                {row.getVisibleCells().map(cell => (
+                  <td key={cell.id} className="px-6 py-4">
+                    {flexRender(
+                      cell.column.columnDef.cell,
+                      cell.getContext()
+                    )}
                   </td>
                 ))}
               </tr>
             ))}
 
-          {/* Empty State */}
-          {!loading && rows.length === 0 && (
+          {!loading && table.getRowModel().rows.length === 0 && (
             <tr>
-              <td colSpan={columns.length} className="p-6 text-center text-neutral-500">
-                No data available.
+              <td colSpan={6} className="py-10 text-center">
+                No users found.
               </td>
             </tr>
           )}
-
-          {/* Table Rows */}
-          {!loading &&
-            rows.map((row) => (
-              <tr
-                key={row.id}
-                className="border-b border-neutral-100 hover:bg-neutral-50"
-              >
-                <td className="p-3 text-neutral-600 font-semibold">{row.id}</td>
-                <td className="p-3 text-neutral-600">{row.date}</td>
-                <td className="p-3 text-neutral-600 font-medium">{row.user}</td>
-                <td className="p-3">{row.title}</td>
-
-                <td className="p-3">
-                  <div
-                    className={`inline-block rounded-full px-2 py-1 text-xs font-semibold ${
-                      row.statusColor || "bg-neutral-200 text-neutral-800"
-                    }`}
-                  >
-                    {row.status}
-                  </div>
-                </td>
-
-                <td className="p-3 text-end">
-                  <button
-                    onClick={() => onViewClick?.(row)}
-                    className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-800 hover:border-neutral-300 hover:text-neutral-950"
-                  >
-                    <span>View</span>
-                  </button>
-                </td>
-              </tr>
-            ))}
         </tbody>
       </table>
-    </div>
-  );
-};
 
-export default DataTable;
+      {/* Pagination */}
+      <div className="flex items-center justify-between px-4 py-3 text-sm">
+        <span>
+          Page {page} of {Math.ceil(total / pageSize)}
+        </span>
+
+        <div className="space-x-2">
+          <button
+            onClick={() => onPageChange(page - 1)}
+            disabled={page === 1}
+            className="rounded px-3 py-1 disabled:opacity-40"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => onPageChange(page + 1)}
+            disabled={page * pageSize >= total}
+            className="rounded px-3 py-1 disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
+      {/* Edit Modal */}
+      <EditStudentModal
+        isOpen={editOpen}
+        student={selectedUser || undefined}
+        onClose={() => setEditOpen(false)}
+        onSave={(data) => {
+          console.log("Save changes:", data)
+          // 👉 Supabase update here
+        }}
+      />
+
+      {/* Delete Modal */}
+      <DeleteStudentModal
+        isOpen={deleteOpen}
+        student={selectedUser || undefined}
+        onClose={() => setDeleteOpen(false)}
+        onDelete={() => {
+          console.log("Deleted user")
+          // 👉 refetch users here
+        }}
+      />
+    </div>
+  )
+}

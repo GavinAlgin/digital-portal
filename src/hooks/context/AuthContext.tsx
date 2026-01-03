@@ -2,8 +2,10 @@ import {
   createContext,
   useContext,
   useState,
+  useEffect,
   type ReactNode,
 } from "react";
+import { supabase } from "../supabase/supabaseClient";
 
 /** Allowed roles */
 type UserRole = "admin" | "user";
@@ -28,12 +30,9 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [role, setRole] = useState<UserRole | null>(() => {
     const storedRole = localStorage.getItem("role");
-
-    if (storedRole === "admin" || storedRole === "user") {
-      return storedRole;
-    }
-
-    return null;
+    return storedRole === "admin" || storedRole === "user"
+      ? storedRole
+      : null;
   });
 
   const isAuthenticated = role !== null;
@@ -43,10 +42,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("role", role);
   };
 
-  const logout = () => {
+  const logout = async () => {
     setRole(null);
     localStorage.removeItem("role");
+
+    // Ensure Supabase session is cleared
+    await supabase.auth.signOut();
   };
+
+  useEffect(() => {
+    // 🔐 Single global auth listener
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "TOKEN_REFRESH_FAILED") {
+        console.warn("Supabase token refresh failed — signing out");
+        logout();
+      }
+
+      if (event === "SIGNED_OUT") {
+        setRole(null);
+        localStorage.removeItem("role");
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -64,49 +87,3 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 /** Hook */
 export const useAuth = () => useContext(AuthContext);
-
-
-
-// import { createContext, useContext, useState, type ReactNode } from "react";
-
-// type UserRole = "admin" | "user" | null;
-
-// interface AuthContextType {
-//   isAuthenticated: boolean;
-//   role: UserRole;
-//   login: (role: UserRole) => void;
-//   logout: () => void;
-// }
-
-// const AuthContext = createContext<AuthContextType>({
-//   isAuthenticated: false,
-//   role: null,
-//   login: () => {},
-//   logout: () => {},
-// });
-
-// export const AuthProvider = ({ children }: { children: ReactNode }) => {
-//   const [role, setRole] = useState<UserRole>(() => {
-//     return (localStorage.getItem("role") as UserRole) || null;
-//   });
-
-//   const isAuthenticated = role !== null;
-
-//   const login = (role: UserRole) => {
-//     setRole(role);
-//     localStorage.setItem("role", role);
-//   };
-
-//   const logout = () => {
-//     setRole(null);
-//     localStorage.removeItem("role");
-//   };
-
-//   return (
-//     <AuthContext.Provider value={{ isAuthenticated, role, login, logout }}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };
-
-// export const useAuth = () => useContext(AuthContext);

@@ -12,6 +12,7 @@ import AccommodationForm from "./pages/users/AccommodationForm";
 import { SupportForm } from "./pages/SupportForm";
 import Profile from "./pages/users/ProfilePage";
 import SignupConfirmed from "./pages/ConfirmationPage";
+import DataTable from "./components/Data-Table";
 
 function AppRoutes() {
   const { isAuthenticated, role } = useAuth();
@@ -73,6 +74,12 @@ function AppRoutes() {
         path="/signup-confirmation"
         element={
           <SignupConfirmed />
+        }
+      />
+      <Route
+        path="/data-table"
+        element={
+          <DataTable />
         }
       />
 

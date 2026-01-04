@@ -5,14 +5,14 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import { AuthProvider, useAuth } from "./hooks/context/AuthContext";
 import ProtectedRoute from "./hooks/routes/ProtectedRoute";
 import UsersDataDashboard from "./pages/admin/UsersDataDashboard";
-// import EventDashboard from "./pages/admin/EventDashboard";
+import EventDashboard from "./pages/admin/EventDashboard";
 import RegistrationForm from "./components/RegisterForm";
 import ForgotPassword from "./components/reset-password/ForgotPassword";
 import AccommodationForm from "./pages/users/AccommodationForm";
 import { SupportForm } from "./pages/SupportForm";
 import Profile from "./pages/users/ProfilePage";
 import SignupConfirmed from "./pages/ConfirmationPage";
-import DataTable from "./components/Data-Table";
+import TimeTableDashboard from "./pages/admin/TimeTableDashboard";
 
 function AppRoutes() {
   const { isAuthenticated, role } = useAuth();
@@ -76,12 +76,6 @@ function AppRoutes() {
           <SignupConfirmed />
         }
       />
-      <Route
-        path="/data-table"
-        element={
-          <DataTable />
-        }
-      />
 
       {/* Admin Protected Route */}
       <Route
@@ -92,14 +86,14 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      {/* <Route
+      <Route
         path="/admin/tickets"
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <EventDashboard />
           </ProtectedRoute>
         }
-      /> */}
+      />
       <Route
         path="/admin/users"
         element={
@@ -113,6 +107,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <RegistrationForm />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/attendance"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <TimeTableDashboard />
           </ProtectedRoute>
         }
       />

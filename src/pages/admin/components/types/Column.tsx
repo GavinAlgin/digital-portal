@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { MoreVertical, Pencil, Trash2 } from "lucide-react"
+import { MoreVertical, Pencil, SettingsIcon, Trash2 } from "lucide-react"
 import { useState } from "react"
 
 export type AppUser = {
@@ -65,9 +65,10 @@ export const userColumns = (
             <div className="absolute right-0 z-20 mt-1 w-36 rounded-md border bg-white shadow-md">
               <button
                 onClick={() => onView(row.original)}
-                className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-100"
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-neutral-100"
               >
-                View
+                
+                <SettingsIcon size={14} /> Status
               </button>
 
               <button

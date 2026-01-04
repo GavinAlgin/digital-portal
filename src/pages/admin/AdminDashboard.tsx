@@ -75,7 +75,8 @@ const AdminDashboard: React.FC = () => {
         navItems={[
           { label: "Dashboard", href: "/admin" },
           { label: "Tickets", href: "/admin/tickets" },
-          { label: "Attendance", href: "#" },
+          { label: "Attendance", href: "/admin/attendance" },
+          { label: "Reports", href: "/admin/reports" },
           { label: "Users", href: "/admin/users" },
         ]}
         notificationsCount={3}

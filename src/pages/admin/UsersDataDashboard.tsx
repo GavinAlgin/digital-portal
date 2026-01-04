@@ -87,7 +87,8 @@ export default function UserDashboard() {
         navItems={[
           { label: "Dashboard", href: "/admin" },
           { label: "Tickets", href: "/admin/tickets" },
-          { label: "Reports", href: "#" },
+          { label: "Attendance", href: "/admin/attendance" },
+          { label: "Reports", href: "/admin/reports" },
           { label: "Users", href: "/admin/users" },
         ]}
         notificationsCount={3}

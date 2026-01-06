@@ -1,6 +1,6 @@
-import { useState, useRef, ReactNode } from "react";
+import { useState, useRef } from "react";
 import { Modal } from "./ui"; // Reuse your custom Modal component
-import { Input, Label, Button, Avatar } from "./custom-ui"; // We'll define these below
+import { Input, Label, Button, Avatar } from "./Custom-UI"; // We'll define these below
 
 interface EditStudentModalProps {
   isOpen: boolean;

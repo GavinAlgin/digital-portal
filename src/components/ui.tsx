@@ -1,9 +1,21 @@
-/* ----------------------------- CUSTOM UI ----------------------------- */
-import { ReactNode, useState } from "react";
-import { AlertTriangleIcon } from "lucide-react";
+/* ----------------------------- IMPORTS ----------------------------- */
+import { useState, type ReactNode } from "react";
+import { AlertTriangle } from "lucide-react";
 
 /* ----------------------------- SELECT COMPONENTS ----------------------------- */
-export function Select({ value, onValueChange, children, className = "" }: any) {
+interface SelectProps {
+  value: string;
+  onValueChange: (value: string) => void;
+  children: ReactNode;
+  className?: string;
+}
+
+export function Select({
+  value,
+  onValueChange,
+  children,
+  className = "",
+}: SelectProps) {
   return (
     <select
       value={value}
@@ -15,12 +27,22 @@ export function Select({ value, onValueChange, children, className = "" }: any) 
   );
 }
 
-export function SelectItem({ value, children }: any) {
+interface SelectItemProps {
+  value: string;
+  children: ReactNode;
+}
+
+export function SelectItem({ value, children }: SelectItemProps) {
   return <option value={value}>{children}</option>;
 }
 
 /* ----------------------------- BADGE COMPONENT ----------------------------- */
-export function Badge({ children, className = "" }: { children: ReactNode; className?: string }) {
+interface BadgeProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export function Badge({ children, className = "" }: BadgeProps) {
   return (
     <span className={`px-2 py-1 text-xs rounded-full font-medium ${className}`}>
       {children}
@@ -29,41 +51,71 @@ export function Badge({ children, className = "" }: { children: ReactNode; class
 }
 
 /* ----------------------------- TABLE COMPONENTS ----------------------------- */
-export function Table({ children }: { children: ReactNode }) {
+interface ChildrenProps {
+  children: ReactNode;
+}
+
+export function Table({ children }: ChildrenProps) {
   return <table className="w-full table-auto border border-gray-300">{children}</table>;
 }
 
-export function TableHeader({ children }: { children: ReactNode }) {
+export function TableHeader({ children }: ChildrenProps) {
   return <thead className="bg-gray-50">{children}</thead>;
 }
 
-export function TableBody({ children }: { children: ReactNode }) {
+export function TableBody({ children }: ChildrenProps) {
   return <tbody>{children}</tbody>;
 }
 
-export function TableRow({ children, className = "" }: { children: ReactNode; className?: string }) {
+interface TableRowProps extends ChildrenProps {
+  className?: string;
+}
+
+export function TableRow({ children, className = "" }: TableRowProps) {
   return <tr className={`border-b border-gray-200 ${className}`}>{children}</tr>;
 }
 
-export function TableHead({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function TableHead({ children, className = "" }: TableRowProps) {
   return <th className={`h-12 px-4 font-medium text-left ${className}`}>{children}</th>;
 }
 
-export function TableCell({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function TableCell({ children, className = "" }: TableRowProps) {
   return <td className={`h-14 px-4 ${className}`}>{children}</td>;
 }
 
 /* ----------------------------- BUTTON COMPONENT ----------------------------- */
-export function Button({ children, onClick, variant = "default", className = "" }: any) {
+type ButtonVariant = "default" | "destructive" | "outline";
+
+interface ButtonProps {
+  children: ReactNode;
+  onClick?: () => void;
+  variant?: ButtonVariant;
+  className?: string;
+  type?: "button" | "submit" | "reset";
+}
+
+export function Button({
+  children,
+  onClick,
+  variant = "default",
+  className = "",
+  type = "button",
+}: ButtonProps) {
   const base =
     "px-4 py-2 rounded font-medium text-sm transition-colors duration-200";
-  const variants: Record<string, string> = {
+
+  const variants: Record<ButtonVariant, string> = {
     default: "bg-blue-600 text-white hover:bg-blue-700",
     destructive: "bg-red-600 text-white hover:bg-red-700",
     outline: "border border-gray-300 text-gray-700 hover:bg-gray-100",
   };
+
   return (
-    <button className={`${base} ${variants[variant]} ${className}`} onClick={onClick}>
+    <button
+      type={type}
+      className={`${base} ${variants[variant]} ${className}`}
+      onClick={onClick}
+    >
       {children}
     </button>
   );
@@ -85,7 +137,7 @@ export function Modal({ isOpen, title, children, onClose }: ModalProps) {
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
         <div className="flex items-start space-x-4">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100">
-            <AlertTriangleIcon className="h-6 w-6 text-red-600" />
+            <AlertTriangle className="h-6 w-6 text-red-600" />
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-semibold mb-2">{title}</h3>

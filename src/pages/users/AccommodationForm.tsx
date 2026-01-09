@@ -157,7 +157,7 @@ const AccommodationForm = () => {
             onChange={handleChange}
             className="w-full rounded-xl border px-4 py-3 text-sm"
           />
-
+{/* 
           <select
             name="unit"
             value={formData.unit ?? ''}
@@ -170,7 +170,7 @@ const AccommodationForm = () => {
                 {unit}
               </option>
             ))}
-          </select>
+          </select> */}
 
           {selectedUnit && (
             <div className="rounded-xl bg-gray-50 p-4 text-sm">

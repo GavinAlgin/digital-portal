@@ -4,6 +4,7 @@ export interface User {
   fullName: string;
   studentNumber: string;
   course: string;
+  faculty: string;
   campus: string;
   avatarUrl?: string; // optional
 }

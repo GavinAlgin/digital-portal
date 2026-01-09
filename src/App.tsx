@@ -137,6 +137,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/user/report"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <SupportForm />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/user/profile"
         element={
           <ProtectedRoute allowedRoles={["user"]}>

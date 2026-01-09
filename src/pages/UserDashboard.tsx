@@ -6,6 +6,8 @@ import type { User } from "../hooks/types";
 import { useAuth } from "../hooks/context/AuthContext";
 import { supabase } from "../hooks/supabase/supabaseClient";
 import moodlelogo from "../assets/moodlelogo.jpeg";
+import { Loader2 } from "lucide-react";
+import Courses from "./users/components/Courses";
 
 export default function Index() {
   const { logout } = useAuth();
@@ -46,6 +48,7 @@ export default function Index() {
         fullName: `${data.first_name} ${data.last_name}`,
         studentNumber: data.id_number,
         course: data.course,
+        faculty: data.faculty,
         campus: data.campus || "Main Campus",
       };
 
@@ -64,7 +67,7 @@ export default function Index() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen text-lg font-semibold">
-        Loading your student profile...
+        <Loader2 className="h-10 w-10 animate-spin text-gray-600" />
       </div>
     );
   }
@@ -98,12 +101,16 @@ export default function Index() {
                 Student card expiration date
               </h3>
               <p className="text-sm text-gray-600">
-                01-01-2026 | 01-01-2027
+                01-01-2026 | 01-01-2028
               </p>
             </div>
           </div>
 
-          <Link to="/user/accommodation" className="flex justify-center align-middle text-blue-600 underline mt-4">Accommodation Form</Link>
+          <Link to="/user/accommodation" className="flex justify-center align-middle text-blue-600 underline mt-4">Accommodation Request</Link>
+
+          <div className="mt-6">
+            <Courses />
+          </div>
 
         </div>
       </main>

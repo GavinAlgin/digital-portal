@@ -31,9 +31,10 @@ const StudentCard: FC<StudentCardProps> = ({ user }) => {
       {/* Student Info */}
       <div className="p-4 flex flex-col space-y-1">
         <h2 className="text-xl font-semibold text-gray-900">{user.fullName}</h2>
-        <p className="text-sm text-gray-700">Student Number: {user.studentNumber}</p>
-        <p className="text-sm text-gray-600">{user.course}</p>
-        <p className="text-sm text-gray-600">{user.campus}</p>
+        <h2 className="text-sm text-gray-700">STU NUMBER: {user.studentNumber}</h2>
+        <p className="text-sm text-gray-700">FACULTY OF {user.faculty.toUpperCase()}</p>
+        <p className="text-sm text-gray-600">{user.course.toUpperCase()}</p>
+        {/* <p className="text-sm text-gray-600">{user.campus}</p> */}
       </div>
     </motion.div>
   );

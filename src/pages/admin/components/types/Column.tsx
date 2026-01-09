@@ -1,13 +1,13 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { MoreVertical, Pencil, SettingsIcon, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { ActionsCell } from "../ActionCell"
 
-export type AppUser = {
+export interface AppUser {
   id: string
-  role: string
-  IDNumber: string
+  role: "student" | "staff"
+  idNumber: string
   firstName: string
   lastName: string
+  email: string
   course?: string
   faculty?: string
   createdAt: string
@@ -18,9 +18,8 @@ export const userColumns = (
   onEdit: (row: AppUser) => void,
   onDelete: (row: AppUser) => void
 ): ColumnDef<AppUser>[] => [
-
   {
-    accessorKey: "IDNumber",
+    accessorKey: "idNumber", 
     header: "ID Number",
   },
   {
@@ -30,6 +29,10 @@ export const userColumns = (
   {
     accessorKey: "lastName",
     header: "Last Name",
+  },
+  {
+    accessorKey: "email",
+    header: "Email",
   },
   {
     accessorKey: "course",
@@ -45,49 +48,16 @@ export const userColumns = (
     cell: ({ getValue }) =>
       new Date(getValue<string>()).toLocaleDateString(),
   },
-
   {
     id: "actions",
     header: "",
-    cell: ({ row }) => {
-      const [open, setOpen] = useState(false)
-
-      return (
-        <div className="relative">
-          <button
-            onClick={() => setOpen(!open)}
-            className="rounded p-1 hover:bg-neutral-100"
-          >
-            <MoreVertical size={18} />
-          </button>
-
-          {open && (
-            <div className="absolute right-0 z-20 mt-1 w-36 rounded-md border bg-white shadow-md">
-              <button
-                onClick={() => onView(row.original)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-neutral-100"
-              >
-                
-                <SettingsIcon size={14} /> Status
-              </button>
-
-              <button
-                onClick={() => onEdit(row.original)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-neutral-100"
-              >
-                <Pencil size={14} /> Edit
-              </button>
-
-              <button
-                onClick={() => onDelete(row.original)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-              >
-                <Trash2 size={14} /> Delete
-              </button>
-            </div>
-          )}
-        </div>
-      )
-    },
+    cell: ({ row }) => (
+      <ActionsCell
+        row={row.original}
+        onView={onView}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
+    ),
   },
 ]

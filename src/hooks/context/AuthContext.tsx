@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "TOKEN_REFRESH_FAILED") {
+      if ((event as string) === 'TOKEN_REFRESH_FAILED') {
         console.warn("Supabase token refresh failed — signing out");
         logout();
       }

@@ -1,10 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../../../hooks/supabase/supabaseClient";
 
 export default function Settings() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const user = supabase.auth.getUser();
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  // Fetch user data
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error("Error fetching user:", error.message);
+      } else {
+        setUserEmail(data.user?.email ?? null);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handlePasswordChange = async () => {
     const { error } = await supabase.auth.updateUser({
@@ -71,8 +85,7 @@ export default function Settings() {
           {/* Email */}
           <p className="py-2 text-xl font-semibold">Email Address</p>
           <p className="text-gray-600">
-            Your email address is{" "}
-            <strong>{(await user).data.user?.email}</strong>
+            Your email address is <strong>{userEmail || "Loading..."}</strong>
           </p>
 
           <hr className="my-8" />

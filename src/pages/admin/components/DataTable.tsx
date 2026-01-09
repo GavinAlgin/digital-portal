@@ -1,5 +1,3 @@
-"use client"
-
 import {
   flexRender,
   getCoreRowModel,
@@ -9,8 +7,6 @@ import { userColumns, type AppUser } from "./types/Column"
 import { useState } from "react"
 import EditStudentModal from "../../../components/EditModal"
 import DeleteStudentModal from "../../../components/DeleteModal"
-// import DeleteStudentModal from "../modals/DeleteStudentModal"
-// import EditStudentModal from "../modals/EditStudentModal"
 
 interface Props {
   data: AppUser[]

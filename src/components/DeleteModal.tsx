@@ -1,9 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import type { Student } from "../hooks/types";
 import { supabase } from "../hooks/supabase/supabaseClient";
 
 interface DeleteStudentModalProps {
-  student?: Student; // optional
+  student?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    image?: string | null;
+    // add other AppUser fields if needed
+  };
   isOpen: boolean;
   onClose: () => void;
   onDelete?: () => void; // optional callback after deletion
@@ -43,7 +49,7 @@ export default function DeleteStudentModal({
     if (error) {
       setBtnState("error");
       console.error("Delete error:", error.message);
-      setTimeout(() => setBtnState("idle"), 1500); // reset to idle after short delay
+      setTimeout(() => setBtnState("idle"), 1500);
       return;
     }
 
@@ -56,7 +62,6 @@ export default function DeleteStudentModal({
     }, 1200);
   };
 
-  // Button content based on state
   const renderButtonContent = () => {
     switch (btnState) {
       case "idle":
@@ -130,7 +135,6 @@ export default function DeleteStudentModal({
     }
   };
 
-  // Button colors based on state
   const btnClasses = () => {
     switch (btnState) {
       case "idle":
@@ -151,7 +155,7 @@ export default function DeleteStudentModal({
         <p className="mb-6">
           Are you sure you want to delete{" "}
           <strong>
-            {student.first_name} {student.last_name}
+            {student.firstName} {student.lastName}
           </strong>
           ?
         </p>

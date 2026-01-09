@@ -5,15 +5,21 @@ import { useNavigate } from "react-router-dom";
 import { getCurrentUser, type User } from "../../hooks/context/AdminLogged";
 import { supabase } from "../../hooks/supabase/supabaseClient";
 import UserTable from "./components/DataTable";
+import { Loader2 } from "lucide-react";
 
-type AppUser = {
-  id: string;
-  role: string; // "student" or "staff"
-  userId: string;
-  fullName: string;
-  email: string;
-  program?: string;
-};
+export interface AppUser {
+  id: string
+  role: "student" | "staff"
+
+  idNumber: string
+  firstName: string
+  lastName: string
+  email: string
+
+  course?: string
+  faculty?: string
+  createdAt: string
+}
 
 export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
@@ -61,9 +67,10 @@ export default function UserDashboard() {
       const formatted = data.map((u) => ({
         id: u.id,
         role: u.role,
-        IDNumber: u.id_number,
+        idNumber: u.id_number,
         firstName: u.first_name,
         lastName: u.last_name,
+        email: u.email,
         course: u.course ?? "",
         faculty: u.faculty ?? "",
         createdAt: u.created_at,
@@ -76,7 +83,9 @@ export default function UserDashboard() {
     fetchUsers();
   }, []);
 
-  if (!user) return <p className="text-center">Loading or not logged in...</p>;
+  if (!user) return       <div className="flex items-center justify-center h-screen text-lg font-semibold">
+        <Loader2 className="h-10 w-10 animate-spin text-gray-600" />
+      </div>;
 
   return (
     <>

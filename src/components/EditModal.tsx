@@ -1,44 +1,71 @@
-import { useState, useRef } from "react";
-import { Modal } from "./ui"; // Reuse your custom Modal component
-import { Input, Label, Button, Avatar } from "./Custom-UI"; // We'll define these below
+import { useState, useRef, useEffect } from "react";
+import { Modal } from "./ui"; // Your custom Modal component
+import { Input, Label, Button, Avatar } from "./Custom-UI";
 
 interface EditStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
   student?: {
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     email: string;
     image?: string | null;
   };
-  onSave: (data: { first_name: string; last_name: string; email: string; image?: string | null }) => void;
+  onSave: (data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    image?: string | null;
+  }) => void;
 }
 
-export default function EditStudentModal({ isOpen, onClose, student, onSave }: EditStudentModalProps) {
-  const [firstName, setFirstName] = useState(student?.first_name || "");
-  const [lastName, setLastName] = useState(student?.last_name || "");
-  const [email, setEmail] = useState(student?.email || "");
-  const [image, setImage] = useState<string | null>(student?.image || null);
+export default function EditStudentModal({
+  isOpen,
+  onClose,
+  student,
+  onSave,
+}: EditStudentModalProps) {
+  // Lazy initial state ensures proper initialization
+  const [firstName, setFirstName] = useState(() => student?.firstName || "");
+  const [lastName, setLastName] = useState(() => student?.lastName || "");
+  const [email, setEmail] = useState(() => student?.email || "");
+  const [image, setImage] = useState<string | null>(() => student?.image || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Sync state when the student prop changes, defer updates to avoid synchronous setState
+  useEffect(() => {
+    if (!student) return;
+
+    const id = setTimeout(() => {
+      setFirstName(student.firstName);
+      setLastName(student.lastName);
+      setEmail(student.email);
+      setImage(student.image || null);
+    }, 0);
+
+    return () => clearTimeout(id);
+  }, [student]);
+
+  // Handle file uploads
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 1048576) {
-        alert("File size exceeds 1MB limit");
-        return;
-      }
+    if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = (event) => setImage(event.target?.result as string);
-      reader.readAsDataURL(file);
+    if (file.size > 1048576) {
+      alert("File size exceeds 1MB limit");
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onload = (event) => setImage(event.target?.result as string);
+    reader.readAsDataURL(file);
   };
 
   const triggerFileInput = () => fileInputRef.current?.click();
 
+  // Save handler
   const handleSave = () => {
-    onSave({ first_name: firstName, last_name: lastName, email, image });
+    onSave({ firstName, lastName, email, image });
     onClose();
   };
 

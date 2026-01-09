@@ -9,7 +9,7 @@ export interface User {
   avatarUrl?: string; // optional
 }
 
-export type Status = "active" | "pending" | "suspended";
+export type Status = "Active" | "Pending" | "Suspended";
 
 export interface Student {
   id: string;
@@ -37,7 +37,7 @@ export const initialStudents: Student[] = [
     faculty: "Science",
     email: "john@example.com",
     role: "student",
-    status: "active",
+    status: "Active",
   },
   {
     id: "2",
@@ -49,7 +49,7 @@ export const initialStudents: Student[] = [
     faculty: "Engineering",
     email: "jane@example.com",
     role: "student",
-    status: "pending",
+    status: "Pending",
   },
   {
     id: "3",
@@ -61,15 +61,15 @@ export const initialStudents: Student[] = [
     faculty: "Science",
     email: "mike@example.com",
     role: "student",
-    status: "suspended",
+    status: "Suspended",
   },
 ];
 
 export function getStatusBadge(status: Status) {
   const config: Record<Status, string> = {
-    active: "bg-green-100 text-green-700",
-    pending: "bg-amber-100 text-amber-700",
-    suspended: "bg-red-100 text-red-700",
+    Active: "bg-green-100 text-green-700",
+    Pending: "bg-amber-100 text-amber-700",
+    Suspended: "bg-red-100 text-red-700",
   };
   return {
     text: status.charAt(0).toUpperCase() + status.slice(1),

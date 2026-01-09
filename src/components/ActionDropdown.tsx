@@ -57,7 +57,7 @@ export default function ActionDropdown({
               onClick={() => { toggleSuspend(student); setOpen(false); }}
               className="block px-4 py-2 text-sm w-full text-left hover:bg-gray-100"
             >
-              {student.status === "active" ? "Suspend" : "Activate"}
+              {student.status === "Active" ? "Suspend" : "Activate"}
             </button>
             <button
               onClick={() => { sendInvitation(student); setOpen(false); }}

@@ -16,7 +16,8 @@ export interface AppUser {
 export const userColumns = (
   onView: (row: AppUser) => void,
   onEdit: (row: AppUser) => void,
-  onDelete: (row: AppUser) => void
+  onDelete: (row: AppUser) => void,
+  onRefresh?: () => void
 ): ColumnDef<AppUser>[] => [
   {
     accessorKey: "idNumber", 
@@ -57,6 +58,7 @@ export const userColumns = (
         onView={onView}
         onEdit={onEdit}
         onDelete={onDelete}
+        onRefresh={onRefresh}
       />
     ),
   },

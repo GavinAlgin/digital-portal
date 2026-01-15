@@ -1,15 +1,13 @@
 import { useState } from "react"
-import { MoreVertical, Pencil, SettingsIcon, Trash2 } from "lucide-react"
+import { LucideRefreshCcw, MoreVertical, Pencil, SettingsIcon, Trash2 } from "lucide-react"
 
 export interface AppUser {
   id: string
   role: "student" | "staff"
-
   idNumber: string
   firstName: string
   lastName: string
   email: string
-
   course?: string
   faculty?: string
   createdAt: string
@@ -20,10 +18,22 @@ interface ActionsCellProps {
   onView: (row: AppUser) => void
   onEdit: (row: AppUser) => void
   onDelete: (row: AppUser) => void
+  onRefresh?: () => Promise<void> | void // allow async refresh
 }
 
-export function ActionsCell({ row, onView, onEdit, onDelete }: ActionsCellProps) {
+export function ActionsCell({ row, onView, onEdit, onDelete, onRefresh }: ActionsCellProps) {
   const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false) // loading state for refresh
+
+  const handleRefresh = async () => {
+    if (!onRefresh) return
+    setLoading(true)
+    try {
+      await onRefresh() // support async refresh
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="relative">
@@ -36,6 +46,21 @@ export function ActionsCell({ row, onView, onEdit, onDelete }: ActionsCellProps)
 
       {open && (
         <div className="absolute right-0 z-20 mt-1 w-36 rounded-md border bg-white shadow-md">
+          {onRefresh && (
+            <button
+              type="button"
+              onClick={handleRefresh}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-neutral-100"
+            >
+              {/* Animate icon if loading */}
+              <LucideRefreshCcw
+                size={14}
+                className={loading ? "animate-spin" : ""}
+              />{" "}
+              {loading ? "Refreshing..." : "Refresh"}
+            </button>
+          )}
+
           <button
             onClick={() => onView(row)}
             className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-neutral-100"

@@ -16,6 +16,7 @@ type Props = {
   student?: Student
   onClose: () => void
   onSave?: (student: Student) => void
+  refreshData: () => void 
 }
 
 export default function EditStudentModal({
@@ -63,26 +64,26 @@ export default function EditStudentModal({
   if (!isOpen || !student) return null
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    if (!hasChanges) return
+    e.preventDefault();
+    if (!hasChanges) return;
 
-    setError(null)
-    setButtonState("processing")
+    setError(null);
+    setButtonState("processing");
 
     try {
-      const updates: Partial<Student> = {}
+      const updates: Partial<Student> = {};
 
       if (name.trim() !== (student.first_name ?? "")) {
-        updates.first_name = name.trim() || null
+        updates.first_name = name.trim() || null;
       }
       if (surname.trim() !== (student.last_name ?? "")) {
-        updates.last_name = surname.trim() || null
+        updates.last_name = surname.trim() || null;
       }
       if (email.trim() !== (student.email ?? "")) {
-        updates.email = email.trim()
+        updates.email = email.trim();
       }
       if (idNumber.trim() !== (student.id_number ?? "")) {
-        updates.id_number = idNumber.trim() || null
+        updates.id_number = idNumber.trim() || null;
       }
 
       // 🗄️ Update user profile only if something changed
@@ -90,45 +91,55 @@ export default function EditStudentModal({
         const { error } = await supabase
           .from("users")
           .update(updates)
-          .eq("id", student.id)
-        if (error) throw error
+          .eq("id", student.id);
+        if (error) throw error;
       }
 
       // 🔐 Update auth email if changed
       if (email.trim() !== student.email) {
-        const { error } = await supabase.auth.updateUser({ email })
-        if (error) throw error
+        const { error } = await supabase.auth.updateUser({ email });
+        if (error) throw error;
       }
 
       // 🔐 Update password if provided
       if (password.trim()) {
         const { error } = await supabase.auth.updateUser({
           password: password.trim(),
-        })
-        if (error) throw error
+        });
+        if (error) throw error;
       }
 
-      setButtonState("success")
-      onSave?.({ ...student, ...updates })
-      setTimeout(onClose, 800)
-    } catch (err: any) {
-      console.error(err)
+      setButtonState("success");
+      onSave?.({ ...student, ...updates });
+      setTimeout(onClose, 800);
+    } catch (err: unknown) {
+      console.error(err);
 
-      if (err.code === "23505") {
-        if (err.message?.includes("users_id_number_key")) {
-          setError("This student ID number is already assigned to another student.")
-        } else if (err.message?.includes("users_email_unique")) {
-          setError("This email address is already in use.")
+      // Narrow unknown error to Error type
+      if (err instanceof Error) {
+        // Supabase errors may have a `code` property, so we define a type for it
+        const supaErr = err as Error & { code?: string };
+
+        if (supaErr.code === "23505") {
+          if (supaErr.message.includes("users_id_number_key")) {
+            setError("This student ID number is already assigned to another student.");
+          } else if (supaErr.message.includes("users_email_unique")) {
+            setError("This email address is already in use.");
+          } else {
+            setError("Duplicate value detected.");
+          }
         } else {
-          setError("Duplicate value detected.")
+          setError(supaErr.message ?? "Something went wrong");
         }
       } else {
-        setError(err.message ?? "Something went wrong")
+        // If err is not an Error instance
+        setError("Something went wrong");
       }
 
-      setButtonState("failed")
+      setButtonState("failed");
     }
-  }
+  };
+
 
   const renderButtonContent = () => {
     switch (buttonState) {

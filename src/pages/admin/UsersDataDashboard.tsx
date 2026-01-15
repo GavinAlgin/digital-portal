@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { getCurrentUser, type User } from "../../hooks/context/AdminLogged";
 import { supabase } from "../../hooks/supabase/supabaseClient";
 import UserTable from "./components/DataTable";
-import { Loader2 } from "lucide-react";
+import { Loader2, LucidePlus } from "lucide-react";
+import { fetchStudents } from "../../hooks/supabase/supabaseActions";
 
 export interface AppUser {
   id: string
@@ -120,8 +121,9 @@ export default function UserDashboard() {
 
             <button
               onClick={() => navigate('/admin/register')}
-              className="rounded-lg bg-neutral-800 px-4 py-2 font-semibold text-white hover:bg-neutral-700">
-              + Add User
+              type="button"
+              className="flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 font-semibold text-white hover:bg-neutral-700 cursor-pointer">
+              <LucidePlus className="w-4 h-4"/> Enrol Student
             </button>
           </div>
 
@@ -139,6 +141,7 @@ export default function UserDashboard() {
                 pageSize={pageSize}
                 total={total}
                 onPageChange={setPage}
+                refreshData={() => fetchStudents()}
               />
             </div>
           )}

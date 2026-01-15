@@ -17,6 +17,7 @@ interface Props {
   pageSize: number
   total: number
   onPageChange: (page: number) => void
+  refreshData: () => void
 }
 
 /**
@@ -38,6 +39,7 @@ export default function UserTable({
   pageSize,
   total,
   onPageChange,
+  refreshData,
 }: Props) {
   const [selectedUser, setSelectedUser] = useState<AppUser | null>(null)
   const [editOpen, setEditOpen] = useState(false)
@@ -55,7 +57,8 @@ export default function UserTable({
       user => {
         setSelectedUser(user)
         setDeleteOpen(true)
-      }
+      },
+      refreshData
     ),
     state: {
       globalFilter,
@@ -170,6 +173,7 @@ export default function UserTable({
         }}
         onSave={updated => {
           console.log("Save changes:", updated)
+          refreshData()
         }}
       />
 
@@ -180,6 +184,7 @@ export default function UserTable({
         onClose={() => setDeleteOpen(false)}
         onDelete={() => {
           console.log("Deleted user")
+          refreshData()
         }}
       />
     </div>

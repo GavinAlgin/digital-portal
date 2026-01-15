@@ -7,10 +7,12 @@ import Header from "./components/Header";
 import { getCurrentUser, type User } from "../../hooks/context/AdminLogged";
 import TopBar from "../../components/calendar/CalendarHeader";
 import Calendar from "../../components/calendar/Calendar";
+import { DataTable } from "../../components/Datatable";
 
 
 const TimeTableDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const [view, setView] = useState("Calendar");
 
   const [loading, setLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
@@ -83,10 +85,17 @@ const TimeTableDashboard: React.FC = () => {
       <main id="page-content" className="flex max-w-full flex-auto flex-col pt-24">
         <div className="container mx-auto p-4 lg:p-8 xl:max-w-7xl">
           <div className="mb-6">
-            <TopBar />
+            <TopBar onViewChange={setView} />
           </div>
-          
-          <Calendar />
+
+          <main className="p-6">
+            {view === "Calendar" && <Calendar />}
+            {view === "Table" && <DataTable data={[]} page={0} 
+            pageSize={0} total={0} 
+            onPageChange={function (page: number): void {
+              throw new Error("Function not implemented.");
+            } } />}
+          </main>
         </div>
       </main>
     </div>

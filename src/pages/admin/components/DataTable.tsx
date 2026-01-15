@@ -1,7 +1,9 @@
 import {
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   useReactTable,
+  type FilterFn,
 } from "@tanstack/react-table"
 import { userColumns, type AppUser } from "./types/Column"
 import { useState } from "react"
@@ -17,6 +19,18 @@ interface Props {
   onPageChange: (page: number) => void
 }
 
+/**
+ * 🔍 Search ONLY name + email
+ */
+const nameEmailFilter: FilterFn<AppUser> = (row, _columnId, filterValue) => {
+  const search = filterValue.toLowerCase()
+
+  const name = row.original.firstName?.toLowerCase() ?? ""
+  const email = row.original.email?.toLowerCase() ?? ""
+
+  return name.includes(search) || email.includes(search)
+}
+
 export default function UserTable({
   data,
   loading,
@@ -28,13 +42,12 @@ export default function UserTable({
   const [selectedUser, setSelectedUser] = useState<AppUser | null>(null)
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [globalFilter, setGlobalFilter] = useState("")
 
   const table = useReactTable({
     data,
     columns: userColumns(
-      user => {
-        console.log("View", user)
-      },
+      user => console.log("View", user),
       user => {
         setSelectedUser(user)
         setEditOpen(true)
@@ -44,9 +57,15 @@ export default function UserTable({
         setDeleteOpen(true)
       }
     ),
+    state: {
+      globalFilter,
+    },
+    globalFilterFn: nameEmailFilter,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     manualPagination: true,
     pageCount: Math.ceil(total / pageSize),
-    getCoreRowModel: getCoreRowModel(),
   })
 
   return (
@@ -56,8 +75,10 @@ export default function UserTable({
         <div className="relative max-w-sm">
           <input
             type="text"
-            placeholder="Search users"
-            className="block w-full bg-gray-100/35 rounded py-2 pl-9 pr-3 text-sm focus:outline-none"
+            value={globalFilter}
+            onChange={e => setGlobalFilter(e.target.value)}
+            placeholder="Search by name or email"
+            className="block w-full bg-gray-100/35 rounded py-2 pl-3 pr-3 text-sm focus:outline-none"
           />
         </div>
       </div>
@@ -142,11 +163,13 @@ export default function UserTable({
       {/* Edit Modal */}
       <EditStudentModal
         isOpen={editOpen}
-        student={selectedUser || undefined}
-        onClose={() => setEditOpen(false)}
-        onSave={(data) => {
-          console.log("Save changes:", data)
-          // 👉 Supabase update here
+        student={selectedUser ?? undefined}
+        onClose={() => {
+          setEditOpen(false)
+          setSelectedUser(null)
+        }}
+        onSave={updated => {
+          console.log("Save changes:", updated)
         }}
       />
 
@@ -157,7 +180,6 @@ export default function UserTable({
         onClose={() => setDeleteOpen(false)}
         onDelete={() => {
           console.log("Deleted user")
-          // 👉 refetch users here
         }}
       />
     </div>

@@ -49,7 +49,7 @@ const Courses: React.FC = () => {
         {courses.map((course) => (
           <div
             key={course.id}
-            className="bg-gray-100 rounded-xl p-4 flex items-center justify-between">
+            className="bg-gray-200 rounded-xl p-4 flex items-center justify-between">
             <div className="flex gap-3">
               {/* <div className="w-11 h-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-semibold">
                 {course.title.charAt(0)}

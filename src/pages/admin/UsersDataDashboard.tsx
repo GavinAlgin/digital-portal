@@ -5,8 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { getCurrentUser, type User } from "../../hooks/context/AdminLogged";
 import { supabase } from "../../hooks/supabase/supabaseClient";
 import UserTable from "./components/DataTable";
-import { Loader2, LucidePlus } from "lucide-react";
+import { Download, Loader2, LucidePlus } from "lucide-react";
 import { fetchStudents } from "../../hooks/supabase/supabaseActions";
+import { exportToCSV, exportToExcel } from "../../hooks/util/exportUsers";
 
 export interface AppUser {
   id: string
@@ -112,6 +113,7 @@ export default function UserDashboard() {
 
           {/* Page Header */}
           <div className="flex justify-between items-center mb-6">
+            {/* LEFT: Title */}
             <div>
               <h1 className="text-2xl font-bold">Manage Users</h1>
               <p className="text-neutral-500 text-sm">
@@ -119,13 +121,36 @@ export default function UserDashboard() {
               </p>
             </div>
 
-            <button
-              onClick={() => navigate('/admin/register')}
-              type="button"
-              className="flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 font-semibold text-white hover:bg-neutral-700 cursor-pointer">
-              <LucidePlus className="w-4 h-4"/> Enrol Student
-            </button>
+            {/* RIGHT: Actions */}
+            <div className="flex items-center gap-3">
+              {/* Export Buttons */}
+              <button
+                onClick={() => exportToCSV(users)}
+                className="flex items-center gap-2 rounded-lg border border-neutral-300 px-3 py-2 text-sm hover:bg-neutral-100"
+              >
+                <Download className="h-4 w-4" />
+                Export CSV
+              </button>
+
+              <button
+                onClick={() => exportToExcel(users)}
+                className="flex items-center gap-2 rounded-lg border border-neutral-300 px-3 py-2 text-sm hover:bg-neutral-100"
+              >
+                <Download className="h-4 w-4" />
+                Export Excel
+              </button>
+
+              {/* Enrol Button */}
+              <button
+                onClick={() => navigate("/admin/register")}
+                className="flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 font-semibold text-white hover:bg-neutral-700"
+              >
+                <LucidePlus className="h-4 w-4" />
+                Enrol Student
+              </button>
+            </div>
           </div>
+
 
           {/* Loading Spinner */}
           {loading ? (

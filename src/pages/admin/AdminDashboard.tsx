@@ -40,6 +40,30 @@ const AdminDashboard = () => {
   const [total, setTotal] = useState(0)
 
   /* ---------------------------------------------
+     DATA STATE
+  ---------------------------------------------- */
+  const [usersCount, setUsersCount] = useState(0)
+  useEffect(() => {
+    if (!user) return
+
+    const fetchUsersCount = async () => {
+      const { count, error } = await supabase
+        .from("users")
+        .select("*", { count: "exact", head: true })
+
+      if (error) {
+        console.error("Error fetching users count:", error)
+      } else {
+        setUsersCount(count ?? 0)
+      }
+    }
+
+    fetchUsersCount()
+  }, [user])
+
+
+
+  /* ---------------------------------------------
      AUTH CHECK
   ---------------------------------------------- */
   useEffect(() => {
@@ -148,8 +172,8 @@ const AdminDashboard = () => {
             description="No read tracking yet"
             percentage=""
           />
-          <TicketCard title="Users" count={1} description="You" percentage="" />
-          <TicketCard title="System Status" count={1} description="OK" percentage="" />
+          <TicketCard title="Users" count={usersCount} description="Registered Students" percentage="" />
+          <TicketCard title="System Status" count={1} description="Admin Login" percentage="" />
         </div>
 
         {/* Data Table */}

@@ -15,7 +15,7 @@ export default function CalendarCell({ day, onSelect, onDropEvent }: Props) {
         const taskId = e.dataTransfer.getData("text/plain");
         onDropEvent(taskId, day.date);
       }}
-      className={`border border-gray-300 h-32 p-2 text-sm cursor-pointer
+      className={`border border-gray-500/55 h-32 p-2 text-sm cursor-pointer
         hover:bg-gray-50 transition
         ${day.isCurrentMonth ? "bg-white" : "bg-gray-100"}
       `}

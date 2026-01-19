@@ -1,111 +1,155 @@
-import { useState } from "react";
-import type { CalendarDay, CalendarTask } from "./types";
-import CalendarCell from "./CalendarCell";
-import EventModal from "./EventModal";
+// Calendar.tsx
+import { useEffect, useState } from "react"
+import CalendarHeader from "./CalendarHeader"
+import CalendarCell from "./CalendarCell"
+import EventModal from "./EventModal"
 
-const initialDays: CalendarDay[] = Array.from({ length: 35 }).map((_, i) => ({
-  date: `2024-03-${String(i + 1).padStart(2, "0")}`,
-  day: i + 1,
-  isCurrentMonth: i < 31,
-  tasks: [],
-}));
+import type { CalendarDay, CalendarTask, EventRecord } from "./types"
+import { supabase } from "../../hooks/supabase/supabaseClient"
 
-const Calendar: React.FC = () => {
-  const [days, setDays] = useState<CalendarDay[]>(initialDays);
-  const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
+/**
+ * Generate calendar grid for a given month/year
+ */
+const generateMonth = (month: number, year: number): CalendarDay[] => {
+  const firstDay = new Date(year, month, 1)
+  const lastDay = new Date(year, month + 1, 0)
+  const offset = firstDay.getDay()
+
+  return Array.from({ length: 42 }).map((_, i) => {
+    const dayNum = i - offset + 1
+    const isCurrentMonth = dayNum > 0 && dayNum <= lastDay.getDate()
+
+    const date = isCurrentMonth
+      ? new Date(year, month, dayNum).toISOString().split("T")[0]
+      : `empty-${i}`
+
+    return {
+      date,
+      day: isCurrentMonth ? dayNum : 0,
+      isCurrentMonth,
+      tasks: [],
+    }
+  })
+}
+
+/**
+ * Convert DB EventRecord → UI CalendarTask
+ */
+const toCalendarTask = (event: EventRecord): CalendarTask => ({
+  id: event.id,
+  title: event.title,
+  date: event.date,
+  color: event.color ?? undefined,
+})
+
+export default function Calendar() {
+  const today = new Date()
+
+  const [month, setMonth] = useState(today.getMonth())
+  const [year, setYear] = useState(today.getFullYear())
+  const [days, setDays] = useState<CalendarDay[]>([])
+  const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null)
+  const [search, setSearch] = useState("")
 
   /**
-   * ADD LESSON EVENT
+   * Load & filter events for current month
    */
-  const addLesson = (lesson: {
-    id: string;
-    title: string;
-    date: Date;
-    color: string;
-  }) => {
-    const lessonDate = lesson.date.toISOString().split("T")[0];
+  useEffect(() => {
+    const load = async () => {
+      const start = `${year}-${String(month + 1).padStart(2, "0")}-01`
+      const end = `${year}-${String(month + 1).padStart(2, "0")}-31`
+
+      const { data } = await supabase
+        .from("events")
+        .select("*")
+        .gte("date", start)
+        .lte("date", end)
+
+      const filtered =
+        search.trim().length === 0
+          ? data
+          : data?.filter(event =>
+              event.title
+                .toLowerCase()
+                .includes(search.toLowerCase())
+            )
+
+      const grid = generateMonth(month, year)
+
+      setDays(
+        grid.map(day => ({
+          ...day,
+          tasks:
+            filtered
+              ?.filter(e => e.date === day.date)
+              .map(toCalendarTask) ?? [],
+        }))
+      )
+    }
+
+    load()
+  }, [month, year, search])
+
+  /**
+   * Drag / Drop event handler
+   */
+  const moveEvent = async (taskId: string, toDate: string) => {
+    await supabase
+      .from("events")
+      .update({ date: toDate })
+      .eq("id", taskId)
 
     setDays(prev =>
-      prev.map(day =>
-        day.date === lessonDate
-          ? {
-              ...day,
-              tasks: [
-                ...day.tasks,
-                {
-                  id: lesson.id,
-                  title: lesson.title,
-                  date: lessonDate,
-                  color: lesson.color,
-                },
-              ],
-            }
-          : day
-      )
-    );
-  };
-
-  /**
-   * DRAG & DROP MOVE
-   */
-  const moveEvent = (taskId: string, toDate: string) => {
-    let movedTask: CalendarTask | null = null;
-
-    const cleared = days.map(day => {
-      const found = day.tasks.find(t => t.id === taskId);
-      if (found) {
-        movedTask = found;
-        return { ...day, tasks: day.tasks.filter(t => t.id !== taskId) };
-      }
-      return day;
-    });
-
-    setDays(
-      cleared.map(day =>
-        day.date === toDate && movedTask
-          ? {
-              ...day,
-              tasks: [...day.tasks, { ...movedTask, date: toDate }],
-            }
-          : day
-      )
-    );
-  };
+      prev.map(day => ({
+        ...day,
+        tasks: day.tasks.filter(task => task.id !== taskId),
+      }))
+    )
+  }
 
   return (
     <>
-      <div className="flex-1 overflow-auto bg-gray-50">
-        <div className="grid grid-cols-7 border border-gray-300">
-          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
-            <div
-              key={day}
-              className="border border-gray-300 bg-white text-xs font-medium p-2"
-            >
-              {day}
-            </div>
-          ))}
+      {/* Header */}
+      <CalendarHeader
+        month={month}
+        year={year}
+        search={search}
+        onSearchChange={setSearch}
+        onChangeDate={(m, y) => {
+          setMonth(m)
+          setYear(y)
+        }}
+      />
 
-          {days.map(day => (
-            <CalendarCell
-              key={day.date}
-              day={day}
-              onSelect={() => setSelectedDay(day)}
-              onDropEvent={moveEvent}
-            />
-          ))}
-        </div>
+      {/* Calendar Grid */}
+      <div className="grid grid-cols-7 border">
+        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => (
+          <div
+            key={d}
+            className="text-xs p-2 border border-gray-500/55 bg-gray-50 font-medium"
+          >
+            {d}
+          </div>
+        ))}
+
+        {days.map(day => (
+          <CalendarCell
+            key={day.date}
+            day={day}
+            onSelect={() => day.isCurrentMonth && setSelectedDay(day)}
+            onDropEvent={moveEvent}
+          />
+        ))}
       </div>
 
-      {/* LESSON MODAL */}
+      {/* Event Modal */}
       {selectedDay && (
         <EventModal
           initialDate={new Date(selectedDay.date)}
           onClose={() => setSelectedDay(null)}
-          onSave={addLesson}
+          onSave={() => setSelectedDay(null)}
         />
       )}
     </>
-  );
-};
-
-export default Calendar;
+  )
+}

@@ -173,10 +173,10 @@ export default function EditStudentModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="w-full max-w-lg bg-white rounded-lg shadow-lg">
         {/* Header */}
-        <div className="flex items-center justify-between border-b px-6 py-4">
+        <div className="flex items-center justify-between border-b border-gray-500/55 px-6 py-4">
           <h2 className="text-lg font-semibold">Edit Student</h2>
           <button onClick={onClose}>
-            <X className="h-5 w-5 text-gray-500" />
+            <X className="h-5 w-5 text-gray-500/55" />
           </button>
         </div>
 
@@ -199,12 +199,12 @@ export default function EditStudentModal({
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end gap-2 border-t px-4 py-3">
+          <div className="flex justify-end gap-2 border-t border-gray-500/55 px-4 py-3">
             <button
               type="button"
               onClick={onClose}
               disabled={buttonState === "processing"}
-              className="text-sm px-3 py-1 text-gray-600 hover:bg-gray-100 rounded"
+              className="text-sm px-3 py-1 text-gray-600 hover:bg-gray-100 rounded cursor-pointer"
             >
               Cancel
             </button>
@@ -253,7 +253,7 @@ function Input({
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full border rounded-md px-3 py-2 text-sm"
+        className="w-full border border-gray-300/55 rounded-md px-3 py-2 text-sm"
       />
     </div>
   )

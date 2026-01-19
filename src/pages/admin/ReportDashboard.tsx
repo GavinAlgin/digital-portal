@@ -5,44 +5,47 @@ import { Loader2 } from "lucide-react";
 import ListecLogo from "../../assets/cropped-flyer-02102024-133x133.png";
 import Header from "./components/Header";
 import { getCurrentUser, type User } from "../../hooks/context/AdminLogged";
-import Calendar from "../../components/calendar/Calendar";
-import { DataTable } from "../../components/Datatable";
 
-const TimeTableDashboard: React.FC = () => {
+
+const ReportDashboard: React.FC = () => {
   const navigate = useNavigate();
 
-  const [view, setView] = useState<"Calendar" | "Table">("Calendar");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
 
-  // Pagination state
-  const [page, setPage] = useState(0);
-  const pageSize = 10;
-
   useEffect(() => {
-    let isMounted = true;
+    let isMounted = true; // prevents state update on unmounted component
 
     const fetchUser = async () => {
       try {
         const loggedUser = await getCurrentUser();
+
         if (!loggedUser) {
           navigate("/admin/login", { replace: true });
           return;
         }
-        if (isMounted) setUser(loggedUser);
-      } catch {
+
+        if (isMounted) {
+          setUser(loggedUser);
+        }
+      } catch (error) {
+        console.error("Failed to fetch current user:", error);
         navigate("/admin/login", { replace: true });
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchUser();
+
     return () => {
       isMounted = false;
     };
   }, [navigate]);
 
+  // 🔄 Loading Spinner (Centered)
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
@@ -51,7 +54,10 @@ const TimeTableDashboard: React.FC = () => {
     );
   }
 
-  if (!user) return null;
+  // 🛑 Safety fallback (should never hit due to redirect)
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -72,29 +78,10 @@ const TimeTableDashboard: React.FC = () => {
         )}`}
       />
 
-      <main className="pt-24">
-        <div className="container mx-auto p-6 xl:max-w-7xl">
-          {/* Example view switch */}
-          <div className="mb-4 flex gap-2">
-            <button onClick={() => setView("Calendar")}>Calendar</button>
-            <button onClick={() => setView("Table")}>Table</button>
-          </div>
-
-          {view === "Calendar" && <Calendar />}
-
-          {view === "Table" && (
-            <DataTable
-              data={[]}
-              page={page}
-              pageSize={pageSize}
-              total={0}
-              onPageChange={(newPage) => setPage(newPage)}
-            />
-          )}
-        </div>
+      <main id="page-content" className="flex max-w-full flex-auto flex-col pt-24">
       </main>
     </div>
   );
 };
 
-export default TimeTableDashboard;
+export default ReportDashboard;

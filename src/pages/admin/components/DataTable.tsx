@@ -57,7 +57,6 @@ export default function UserTable({
     setUsers(data as AppUser[])
   }
 
-
   const table = useReactTable({
     data,
     columns: userColumns(
@@ -83,6 +82,7 @@ export default function UserTable({
     pageCount: Math.ceil(total / pageSize),
   })
 
+  if (!users) return null
   return (
     <div className="relative overflow-x-auto rounded-lg bg-white">
       {/* Search */}

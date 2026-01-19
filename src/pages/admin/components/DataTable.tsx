@@ -9,6 +9,7 @@ import { userColumns, type AppUser } from "./types/Column"
 import { useState } from "react"
 import EditStudentModal from "../../../components/EditModal"
 import DeleteStudentModal from "../../../components/DeleteModal"
+import { supabase } from "../../../hooks/supabase/supabaseClient"
 
 interface Props {
   data: AppUser[]
@@ -45,6 +46,17 @@ export default function UserTable({
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [globalFilter, setGlobalFilter] = useState("")
+  const [users, setUsers] = useState<AppUser[]>([])
+
+  const fetchUsers = async () => {
+    const { data, error } = await supabase.from("users").select("*")
+    if (error) {
+      console.error(error)
+      return
+    }
+    setUsers(data as AppUser[])
+  }
+
 
   const table = useReactTable({
     data,
@@ -171,11 +183,15 @@ export default function UserTable({
           setEditOpen(false)
           setSelectedUser(null)
         }}
-        onSave={updated => {
-          console.log("Save changes:", updated)
-          refreshData()
+        onSave={(updatedUser) => {
+          // 🔁 Optimistically update table state
+          setUsers((prev) =>
+            prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+          )
         }}
+        refreshData={fetchUsers} // optional if you use it
       />
+
 
       {/* Delete Modal */}
       <DeleteStudentModal

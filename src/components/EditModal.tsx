@@ -2,21 +2,15 @@ import { useEffect, useMemo, useState } from "react"
 import type { FormEvent } from "react"
 import { X, Loader2, Check, AlertTriangle } from "lucide-react"
 import { supabase } from "../hooks/supabase/supabaseClient"
-
-type Student = {
-  id: string
-  first_name: string | null
-  last_name: string | null
-  email: string | null
-  id_number: string | null
-}
+import type { AppUser } from "../pages/admin/components/types/Column"
+// import type { AppUser } from "../types/AppUser" // adjust path if needed
 
 type Props = {
   isOpen: boolean
-  student?: Student
+  student?: AppUser
   onClose: () => void
-  onSave?: (student: Student) => void
-  refreshData: () => void 
+  onSave?: (student: AppUser) => void
+  refreshData: () => void
 }
 
 export default function EditStudentModal({
@@ -40,106 +34,112 @@ export default function EditStudentModal({
   useEffect(() => {
     if (!isOpen || !student) return
 
-    setName(student.first_name ?? "")
-    setSurname(student.last_name ?? "")
+    setName(student.firstName ?? "")
+    setSurname(student.lastName ?? "")
     setEmail(student.email ?? "")
-    setIdNumber(student.id_number ?? "")
+    setIdNumber(student.idNumber ?? "")
     setPassword("")
     setButtonState("idle")
     setError(null)
   }, [isOpen, student])
 
-  // ✅ Dirty check: always called
+  // ✅ Dirty check
   const hasChanges = useMemo(() => {
     return (
-      name.trim() !== (student?.first_name ?? "") ||
-      surname.trim() !== (student?.last_name ?? "") ||
+      name.trim() !== (student?.firstName ?? "") ||
+      surname.trim() !== (student?.lastName ?? "") ||
       email.trim() !== (student?.email ?? "") ||
-      idNumber.trim() !== (student?.id_number ?? "") ||
+      idNumber.trim() !== (student?.idNumber ?? "") ||
       password.trim().length > 0
     )
   }, [name, surname, email, idNumber, password, student])
 
-  // ✅ Early return for JSX only
+  // ✅ JSX early return only
   if (!isOpen || !student) return null
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!hasChanges) return;
+    e.preventDefault()
+    if (!hasChanges) return
 
-    setError(null);
-    setButtonState("processing");
+    setError(null)
+    setButtonState("processing")
 
     try {
-      const updates: Partial<Student> = {};
+      // 🔄 Convert camelCase → snake_case ONLY for DB
+      const updates: Record<string, string | null> = {}
 
-      if (name.trim() !== (student.first_name ?? "")) {
-        updates.first_name = name.trim() || null;
+      if (name.trim() !== student.firstName) {
+        updates.first_name = name.trim() || null
       }
-      if (surname.trim() !== (student.last_name ?? "")) {
-        updates.last_name = surname.trim() || null;
+      if (surname.trim() !== student.lastName) {
+        updates.last_name = surname.trim() || null
       }
-      if (email.trim() !== (student.email ?? "")) {
-        updates.email = email.trim();
+      if (email.trim() !== student.email) {
+        updates.email = email.trim()
       }
-      if (idNumber.trim() !== (student.id_number ?? "")) {
-        updates.id_number = idNumber.trim() || null;
+      if (idNumber.trim() !== student.idNumber) {
+        updates.id_number = idNumber.trim() || null
       }
 
-      // 🗄️ Update user profile only if something changed
+      // 🗄️ Update user profile
       if (Object.keys(updates).length > 0) {
         const { error } = await supabase
           .from("users")
           .update(updates)
-          .eq("id", student.id);
-        if (error) throw error;
+          .eq("id", student.id)
+
+        if (error) throw error
       }
 
-      // 🔐 Update auth email if changed
+      // 🔐 Update auth email
       if (email.trim() !== student.email) {
-        const { error } = await supabase.auth.updateUser({ email });
-        if (error) throw error;
+        const { error } = await supabase.auth.updateUser({ email })
+        if (error) throw error
       }
 
       // 🔐 Update password if provided
       if (password.trim()) {
         const { error } = await supabase.auth.updateUser({
           password: password.trim(),
-        });
-        if (error) throw error;
+        })
+        if (error) throw error
       }
 
-      setButtonState("success");
-      onSave?.({ ...student, ...updates });
-      setTimeout(onClose, 800);
-    } catch (err: unknown) {
-      console.error(err);
+      // ✅ Optimistic UI update (camelCase)
+      onSave?.({
+        ...student,
+        firstName: updates.first_name ?? student.firstName,
+        lastName: updates.last_name ?? student.lastName,
+        email: updates.email ?? student.email,
+        idNumber: updates.id_number ?? student.idNumber,
+      })
 
-      // Narrow unknown error to Error type
+      setButtonState("success")
+      setTimeout(onClose, 800)
+    } catch (err: unknown) {
+      console.error(err)
+
       if (err instanceof Error) {
-        // Supabase errors may have a `code` property, so we define a type for it
-        const supaErr = err as Error & { code?: string };
+        const supaErr = err as Error & { code?: string }
 
         if (supaErr.code === "23505") {
           if (supaErr.message.includes("users_id_number_key")) {
-            setError("This student ID number is already assigned to another student.");
+            setError("This student ID number is already assigned to another student.")
           } else if (supaErr.message.includes("users_email_unique")) {
-            setError("This email address is already in use.");
+            setError("This email address is already in use.")
           } else {
-            setError("Duplicate value detected.");
+            setError("Duplicate value detected.")
           }
         } else {
-          setError(supaErr.message ?? "Something went wrong");
+          setError(supaErr.message ?? "Something went wrong")
         }
       } else {
-        // If err is not an Error instance
-        setError("Something went wrong");
+        setError("Something went wrong")
       }
 
-      setButtonState("failed");
+      setButtonState("failed")
     }
-  };
-
+  }
 
   const renderButtonContent = () => {
     switch (buttonState) {
@@ -185,8 +185,17 @@ export default function EditStudentModal({
           <div className="space-y-5 p-6">
             <Input label="First Name" value={name} onChange={setName} />
             <Input label="Surname" value={surname} onChange={setSurname} />
-            <Input label="Student ID Number" value={idNumber} onChange={setIdNumber} />
-            <Input label="Email" value={email} type="email" onChange={setEmail} />
+            <Input
+              label="Student ID Number"
+              value={idNumber}
+              onChange={setIdNumber}
+            />
+            <Input
+              label="Email"
+              value={email}
+              type="email"
+              onChange={setEmail}
+            />
             <Input
               label="New Password"
               type="password"
@@ -204,7 +213,7 @@ export default function EditStudentModal({
               type="button"
               onClick={onClose}
               disabled={buttonState === "processing"}
-              className="text-sm px-3 py-1 text-gray-600 hover:bg-gray-100 rounded cursor-pointer"
+              className="text-sm px-3 py-1 text-gray-600 hover:bg-gray-100 rounded"
             >
               Cancel
             </button>

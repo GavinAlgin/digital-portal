@@ -14,6 +14,7 @@ import Profile from "./pages/users/ProfilePage";
 import SignupConfirmed from "./pages/ConfirmationPage";
 import TimeTableDashboard from "./pages/admin/TimeTableDashboard";
 import ReportDashboard from "./pages/admin/ReportDashboard";
+import FinanceDashboard from "./pages/admin/FinanceDashboard";
 
 function AppRoutes() {
   const { isAuthenticated, role } = useAuth();
@@ -124,6 +125,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <ReportDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/finance"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <FinanceDashboard />
           </ProtectedRoute>
         }
       />

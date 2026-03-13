@@ -63,6 +63,7 @@ const TimeTableDashboard: React.FC = () => {
           { label: "Tickets", href: "/admin/tickets" },
           { label: "Attendance", href: "/admin/attendance" },
           { label: "Reports", href: "/admin/reports" },
+          { label: "Finance", href: "/admin/finance" },
           { label: "Users", href: "/admin/users" },
         ]}
         notificationsCount={3}

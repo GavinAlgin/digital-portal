@@ -1,0 +1,367 @@
+USING VITE, TYPESCRIPT, TAIWLINDCSS,
+
+
+BUILD THIS FOR ME, 
+
+You are a senior full-stack engineer and senior product designer.
+
+Design and generate a **modern, production-ready Financial & Accounting Web Application UI/UX** for an educational institution.
+
+This system must allow the finance department to:
+
+* Manage students
+* Generate invoices
+* Track payments
+* View financial reports
+* Export documents (PDF/Excel)
+* Send automated and manual email reminders
+* Update and configure student billing structures
+
+The UI must be clean, professional, enterprise-grade, and suitable for an institutional finance department.
+
+---
+
+# 🎯 SYSTEM PURPOSE
+
+Build a comprehensive **Finance Management Dashboard** for institutions (schools, universities, academies).
+
+The system must manage:
+
+1. Student financial records
+2. Invoice generation
+3. Payment tracking
+4. Reports and analytics
+5. Email reminders for pending balances
+6. Exportable documentation
+
+---
+
+# 🎨 UI/UX REQUIREMENTS
+
+Design Principles:
+
+* Clean enterprise UI
+* Soft neutral sidebar (slate-50 or zinc-50)
+* White content area
+* No harsh borders
+* Clear hierarchy
+* Accessible typography
+* Financial clarity (important numbers stand out)
+* Dashboard-first layout
+* Responsive design
+* Role-based view (Finance Admin, Accountant, Viewer)
+
+Use:
+
+* React + TypeScript
+* TailwindCSS
+* Component-based architecture
+* Reusable UI components
+* Chart library (Recharts or similar)
+* Table with filtering + sorting
+* Modal system
+* Form validation
+
+---
+
+# 🧱 CORE PAGES REQUIRED
+
+## 1️⃣ Dashboard Page
+
+Display:
+
+* Total Outstanding Balance
+* Total Collected This Month
+* Overdue Invoices
+* Total Students
+* Monthly Revenue Chart
+* Payment Status Pie Chart
+* Recent Transactions Table
+* Upcoming Due Payments Widget
+
+Include:
+
+* Filter by class / term / year
+* Date range picker
+
+---
+
+## 2️⃣ Students Management Page
+
+Table with:
+
+* Student ID
+* Full Name
+* Class / Program
+* Guardian Email
+* Total Fees
+* Paid Amount
+* Outstanding
+* Status (Paid / Partial / Overdue)
+
+Features:
+
+* Search
+* Filter by class
+* Bulk actions
+* Edit student details
+* Configure billing structure
+* Add scholarships / discounts
+* Attach documents
+
+Student Profile View Must Include:
+
+* Payment history timeline
+* Generated invoices
+* Downloadable receipts
+* Notes section (internal finance notes)
+* Send Reminder Button
+
+---
+
+## 3️⃣ Invoice Generator Page
+
+Create Invoice Form:
+
+* Student selector
+* Billing term
+* Line items (tuition, library, transport, misc)
+* Discount field
+* Tax (optional)
+* Due date
+* Notes
+
+Invoice Output:
+
+* Preview before saving
+* PDF export
+* Email invoice button
+* Auto-calculate totals
+
+Invoice Status:
+
+* Draft
+* Sent
+* Paid
+* Partial
+* Overdue
+
+---
+
+## 4️⃣ Payment Entry Page
+
+Record payment form:
+
+* Student
+* Invoice
+* Payment amount
+* Payment method (cash, bank, card, transfer)
+* Transaction reference
+* Date
+* Upload proof of payment
+
+Auto-update:
+
+* Student balance
+* Invoice status
+* Dashboard metrics
+
+---
+
+## 5️⃣ Reports & Analytics Page
+
+Generate:
+
+* Revenue by class
+* Revenue by term
+* Outstanding by class
+* Payment trends
+* Collection rate %
+* Overdue aging report (30/60/90 days)
+
+Export:
+
+* CSV
+* Excel
+* PDF
+
+Include:
+
+* Filters
+* Dynamic chart updates
+
+---
+
+## 6️⃣ Email Reminder System
+
+Finance staff must be able to:
+
+* Send reminder to single student
+* Send bulk reminders
+* Customize email template
+* Preview email before sending
+* Attach invoice PDF
+* Track email sent history
+
+Email Template Must Include:
+
+* Student name
+* Amount due
+* Due date
+* Institution bank details
+* Download invoice link
+
+Also include:
+
+* Automatic reminder option (7 days before due)
+* Overdue auto-reminder
+
+---
+
+## 7️⃣ Configuration / Admin Settings
+
+Allow finance department to:
+
+* Configure billing structure per class
+* Set term dates
+* Add fee categories
+* Set late fee penalties
+* Configure tax settings
+* Upload institution logo
+* Edit email templates
+* Manage user roles
+* Enable / disable automated reminders
+
+---
+
+# 📊 DATA STRUCTURE REQUIREMENTS
+
+Design realistic data models:
+
+Student:
+
+* id
+* name
+* class
+* guardianEmail
+* phone
+* scholarship
+* status
+
+Invoice:
+
+* id
+* studentId
+* items[]
+* total
+* amountPaid
+* dueDate
+* status
+
+Payment:
+
+* id
+* invoiceId
+* amount
+* method
+* date
+* reference
+
+Report:
+
+* generatedAt
+* filterCriteria
+* exportType
+
+---
+
+# 📁 DOCUMENT EXPORT REQUIREMENTS
+
+System must support:
+
+* Export Invoice as PDF
+* Export Student Statement
+* Export Full Outstanding Report
+* Export Payment History
+
+PDF layout must look official and professional.
+
+---
+
+# 🔐 ROLE-BASED ACCESS
+
+Roles:
+
+1. Finance Admin
+2. Accountant
+3. Viewer
+
+Permissions must restrict:
+
+* Editing billing structure
+* Sending bulk emails
+* Deleting invoices
+
+---
+
+# 🎨 DESIGN STYLE
+
+* Modern SaaS look
+* Subtle shadows
+* Soft background (slate-50 sidebar)
+* Clean white content
+* Financial emphasis colors:
+
+  * Green for paid
+  * Red for overdue
+  * Yellow for partial
+* Clear numeric typography
+* Professional invoice layout
+
+---
+
+# 📦 OUTPUT FORMAT
+
+Generate:
+
+1. Full UI page layout
+2. Reusable components
+3. Example mock data
+4. Page routing structure
+5. Clean folder structure
+6. Example email template
+7. Example PDF layout structure
+8. Tailwind styling
+9. State management approach
+10. Explanation of architecture decisions
+
+Code must be structured and production-ready.
+
+---
+
+## PROMPT ENDS HERE
+
+---
+
+# 🔥 Why This Prompt Works
+
+This forces the AI to:
+
+* Think like a product designer
+* Think like a finance department
+* Build scalable architecture
+* Include automation
+* Include export systems
+* Include real institutional workflow
+
+---
+
+If you want, I can now:
+
+* Generate a visual UI layout mockup structure
+* Design the dashboard wireframe
+* Generate a database schema (PostgreSQL)
+* Create API architecture
+* Or build a simplified MVP version first
+
+Tell me your stack preference (Next.js? Vite? MERN? Laravel?) and I’ll tailor it.

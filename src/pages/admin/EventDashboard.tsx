@@ -148,6 +148,7 @@ export default function TicketsPage() {
             { label: "Tickets", href: "/admin/tickets" },
             { label: "Attendance", href: "/admin/attendance" },
             { label: "Reports", href: "#" },
+            { label: "Finance", href: "/admin/finance" },
             { label: "Users", href: "/admin/users" },
           ]}
           notificationsCount={3}

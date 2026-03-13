@@ -1,35 +1,28 @@
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, X } from "lucide-react";
+import {
+  CalendarIcon,
+  X,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
+import { supabase } from "../../hooks/supabase/supabaseClient";
 
 /**
  * TYPES
  */
-type Event = {
-  id: string;
-  title: string;
-  attendees: string;
-  date: Date;
-  time: string;
-  location: string;
-  description: string;
-  color: string;
-};
-
 type Props = {
   initialDate: Date;
   onClose: () => void;
-  onSave: (event: Event) => void;
 };
+
+type SubmitState = "idle" | "loading" | "success" | "error";
 
 /**
  * MAIN MODAL
  */
-export default function EventModal({
-  initialDate,
-  onClose,
-  onSave,
-}: Props) {
+export default function EventModal({ initialDate, onClose }: Props) {
   const [title, setTitle] = useState("");
   const [attendees, setAttendees] = useState("");
   const [date, setDate] = useState<Date>(initialDate);
@@ -37,7 +30,20 @@ export default function EventModal({
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState("bg-blue-500");
+  const [course, setCourse] = useState("");
   const [showCalendar, setShowCalendar] = useState(false);
+  const [submitState, setSubmitState] = useState<SubmitState>("idle");
+
+  /**
+   * COURSE OPTIONS
+   */
+  const courses = [
+    "Algebra I",
+    "Geometry",
+    "Calculus",
+    "Physics",
+    "Chemistry",
+  ];
 
   /**
    * TIME OPTIONS (30min interval)
@@ -66,21 +72,39 @@ export default function EventModal({
     "bg-pink-500",
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  /**
+   * SUBMIT HANDLER (SUPABASE)
+   */
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitState === "loading") return;
 
-    onSave({
-      id: crypto.randomUUID(),
-      title,
-      attendees,
-      date,
-      time,
-      location,
-      description,
-      color,
-    });
+    try {
+      setSubmitState("loading");
 
-    onClose();
+      // Combine date + time into one timestamp
+      const [hours, minutes] = time.split(":").map(Number);
+      const startDateTime = new Date(date);
+      startDateTime.setHours(hours, minutes, 0, 0);
+
+      const { error } = await supabase.from("events").insert({
+        title,
+        attendees,
+        course,
+        start_time: startDateTime.toISOString(),
+        location,
+        description,
+        color,
+      });
+
+      if (error) throw error;
+
+      setSubmitState("success");
+      setTimeout(onClose, 1000);
+    } catch (err) {
+      console.error("Error inserting event:", err);
+      setSubmitState("error");
+    }
   };
 
   return (
@@ -90,19 +114,38 @@ export default function EventModal({
         <div className="flex items-center justify-between border-b border-gray-300/55 px-6 py-4">
           <h2 className="text-lg font-semibold">Schedule a Lesson</h2>
           <button onClick={onClose}>
-            <X className="h-5 w-5 text-gray-500/55 cursor-pointer" />
+            <X className="h-5 w-5 text-gray-500/55" />
           </button>
         </div>
 
         {/* FORM */}
         <form onSubmit={handleSubmit}>
           <div className="space-y-6 p-6">
+            {/* COURSE */}
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Course</label>
+              <select
+                className="w-full border border-gray-300/55 rounded-md px-3 py-2 text-sm"
+                value={course}
+                onChange={e => setCourse(e.target.value)}
+                required
+              >
+                <option value="" disabled>
+                  Select a course
+                </option>
+                {courses.map(c => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* TITLE */}
             <div className="space-y-1">
-              <label className="text-medium font-medium mb-4">Lesson Title</label>
+              <label className="text-sm font-medium">Lesson Title</label>
               <input
                 className="w-full border border-gray-300/55 rounded-md px-3 py-2 text-sm"
-                placeholder="e.g. Algebra Lesson"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 required
@@ -111,27 +154,22 @@ export default function EventModal({
 
             {/* ATTENDEES */}
             <div className="space-y-1">
-              <label className="text-medium font-medium mb-4">Attendees</label>
+              <label className="text-sm font-medium">Attendees</label>
               <input
                 className="w-full border border-gray-300/55 rounded-md px-3 py-2 text-sm"
-                placeholder="student@email.com"
                 value={attendees}
                 onChange={e => setAttendees(e.target.value)}
               />
-              <p className="text-xs text-gray-600/65">
-                Separate multiple emails with commas
-              </p>
             </div>
 
             {/* DATE & TIME */}
             <div className="grid grid-cols-3 gap-4">
-              {/* DATE */}
               <div className="col-span-2 space-y-1 relative">
-                <label className="text-medium font-medium mb-4">Date</label>
+                <label className="text-sm font-medium">Date</label>
                 <button
                   type="button"
                   onClick={() => setShowCalendar(!showCalendar)}
-                  className="w-full flex items-center gap-2 border border-gray-300/55 rounded-md px-3 py-2 text-sm text-left"
+                  className="w-full flex items-center gap-2 border border-gray-300/55 rounded-md px-3 py-2 text-sm"
                 >
                   <CalendarIcon className="h-4 w-4" />
                   {format(date, "PPP")}
@@ -150,9 +188,8 @@ export default function EventModal({
                 )}
               </div>
 
-              {/* TIME */}
               <div className="space-y-1">
-                <label className="text-medium font-medium mb-4">Time</label>
+                <label className="text-sm font-medium">Time</label>
                 <select
                   className="w-full border border-gray-300/55 rounded-md px-2 py-2 text-sm"
                   value={time}
@@ -169,12 +206,9 @@ export default function EventModal({
 
             {/* LOCATION */}
             <div className="space-y-1">
-              <label className="text-medium font-medium mb-4">
-                Location / Meeting Link
-              </label>
+              <label className="text-sm font-medium">Location / Link</label>
               <input
                 className="w-full border border-gray-300/55 rounded-md px-3 py-2 text-sm"
-                placeholder="Room 4 or Zoom link"
                 value={location}
                 onChange={e => setLocation(e.target.value)}
               />
@@ -182,25 +216,24 @@ export default function EventModal({
 
             {/* DESCRIPTION */}
             <div className="space-y-1">
-              <label className="text-medium font-medium mb-4">Description</label>
+              <label className="text-sm font-medium">Description</label>
               <textarea
                 className="w-full border border-gray-300/55 rounded-md px-3 py-2 text-sm min-h-[100px]"
-                placeholder="Lesson notes or agenda"
                 value={description}
                 onChange={e => setDescription(e.target.value)}
               />
             </div>
 
-            {/* COLOR PICKER */}
+            {/* COLOR */}
             <div className="space-y-2">
-              <label className="text-medium font-medium mb-4">Lesson Color</label>
+              <label className="text-sm font-medium">Lesson Color</label>
               <div className="flex gap-3">
                 {COLORS.map(c => (
                   <button
                     key={c}
                     type="button"
                     onClick={() => setColor(c)}
-                    className={`h-6 w-6 rounded-full ${c} ring-offset-2 ${
+                    className={`h-6 w-6 rounded-full ${c} ${
                       color === c ? "ring-2 ring-gray-300/55" : ""
                     }`}
                   />
@@ -214,15 +247,43 @@ export default function EventModal({
             <button
               type="button"
               onClick={onClose}
-              className="text-sm px-3 py-1 text-gray-600 hover:bg-gray-100 rounded"
+              disabled={submitState === "loading"}
+              className="text-sm px-3 py-1 rounded hover:bg-gray-100"
             >
               Cancel
             </button>
+
             <button
               type="submit"
-              className="bg-black hover:bg-gray-800/55 text-white text-sm px-4 py-1.5 rounded-md cursor-pointer"
+              disabled={submitState === "loading"}
+              className={`flex items-center gap-2 text-sm px-4 py-1.5 rounded-md text-white
+                ${
+                  submitState === "idle" && "bg-black hover:bg-gray-800"
+                }
+                ${submitState === "loading" && "bg-gray-400"}
+                ${submitState === "success" && "bg-green-600"}
+                ${submitState === "error" && "bg-red-600"}
+              `}
             >
-              Schedule
+              {submitState === "idle" && "Schedule"}
+              {submitState === "loading" && (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving
+                </>
+              )}
+              {submitState === "success" && (
+                <>
+                  <CheckCircle className="h-4 w-4" />
+                  Saved
+                </>
+              )}
+              {submitState === "error" && (
+                <>
+                  <AlertCircle className="h-4 w-4" />
+                  Retry
+                </>
+              )}
             </button>
           </div>
         </form>

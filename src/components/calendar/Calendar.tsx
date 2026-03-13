@@ -147,7 +147,7 @@ export default function Calendar() {
         <EventModal
           initialDate={new Date(selectedDay.date)}
           onClose={() => setSelectedDay(null)}
-          onSave={() => setSelectedDay(null)}
+          // onSave={() => setSelectedDay(null)}
         />
       )}
     </>

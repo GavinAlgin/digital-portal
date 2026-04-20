@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import ListecLogo from "../../assets/cropped-flyer-02102024-133x133.png";
-import Header from "./components/Header";
+// import ListecLogo from "../../assets/cropped-flyer-02102024-133x133.png";
+// import Header from "./components/Header";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser, type User } from "../../hooks/context/AdminLogged";
 import { supabase } from "../../hooks/supabase/supabaseClient";
@@ -8,6 +8,7 @@ import UserTable from "./components/DataTable";
 import { Download, Loader2, LucidePlus } from "lucide-react";
 import { fetchStudents } from "../../hooks/supabase/supabaseActions";
 import { exportToCSV, exportToExcel } from "../../hooks/util/exportUsers";
+import AppSidebar from "../../components/Side-bar";
 
 export interface AppUser {
   id: string
@@ -29,10 +30,10 @@ export default function UserDashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [page, setPage] = useState(1);
-  const pageSize = 10
-  const total = users.length
 
-  // FETCH LOGGED-IN USER
+  const pageSize = 10;
+  const total = users.length;
+
   useEffect(() => {
     const fetchUser = async () => {
       const loggedUser = await getCurrentUser();
@@ -41,24 +42,24 @@ export default function UserDashboard() {
     fetchUser();
   }, []);
 
-  // FETCH USERS FROM SUPABASE
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
+
       const { data, error } = await supabase
-      .from("users")
-      .select(`
-        id,
-        id_number,
-        first_name,
-        last_name,
-        email,
-        course,
-        faculty,
-        role,
-        created_at
-      `)
-      .in("role", ["student", "staff"]);
+        .from("users")
+        .select(`
+          id,
+          id_number,
+          first_name,
+          last_name,
+          email,
+          course,
+          faculty,
+          role,
+          created_at
+        `)
+        .in("role", ["student", "staff"]);
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -85,36 +86,25 @@ export default function UserDashboard() {
     fetchUsers();
   }, []);
 
-  if (!user) return       <div className="flex items-center justify-center h-screen text-lg font-semibold">
+  if (!user)
+    return (
+      <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-10 w-10 animate-spin text-gray-600" />
-      </div>;
+      </div>
+    );
 
   return (
-    <>
-      {/* HEADER */}
-      <Header
-        logo={ListecLogo}
-        logoText="LISTEC"
-        navItems={[
-          { label: "Dashboard", href: "/admin" },
-          { label: "Tickets", href: "/admin/tickets" },
-          { label: "Attendance", href: "/admin/attendance" },
-          { label: "Reports", href: "/admin/reports" },
-          { label: "Finance", href: "/admin/finance" },
-          { label: "Users", href: "/admin/users" },
-        ]}
-        notificationsCount={3}
-        userName={user.first_name ?? user.email ?? "User"}
-        userProfileUrl={`https://avatar.iran.liara.run/username?username=${user.first_name}+${user.last_name}`}
-      />
+    <div className="flex min-h-screen bg-white">
+      
+      {/* SIDEBAR */}
+      <AppSidebar />
 
-      {/* BODY */}
-      <main id="page-content" className="flex max-w-full flex-auto flex-col pt-24">
-        <div className="container mx-auto p-4 lg:p-8 xl:max-w-7xl">
+      {/* MAIN CONTENT */}
+      <main className="flex-1 p-6 lg:p-10">
+        <div className="mx-auto max-w-7xl">
 
           {/* Page Header */}
           <div className="flex justify-between items-center mb-6">
-            {/* LEFT: Title */}
             <div>
               <h1 className="text-2xl font-bold">Manage Users</h1>
               <p className="text-neutral-500 text-sm">
@@ -122,9 +112,7 @@ export default function UserDashboard() {
               </p>
             </div>
 
-            {/* RIGHT: Actions */}
             <div className="flex items-center gap-3">
-              {/* Export Buttons */}
               <button
                 onClick={() => exportToCSV(users)}
                 className="flex items-center gap-2 rounded-lg border border-neutral-300 px-3 py-2 text-sm hover:bg-neutral-100"
@@ -141,7 +129,6 @@ export default function UserDashboard() {
                 Export Excel
               </button>
 
-              {/* Enrol Button */}
               <button
                 onClick={() => navigate("/admin/register")}
                 className="flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 font-semibold text-white hover:bg-neutral-700"
@@ -152,11 +139,10 @@ export default function UserDashboard() {
             </div>
           </div>
 
-
-          {/* Loading Spinner */}
+          {/* Loading */}
           {loading ? (
             <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-neutral-800"></div>
+              <Loader2 className="h-10 w-10 animate-spin text-neutral-800" />
             </div>
           ) : (
             <div className="rounded-lg border border-neutral-200 bg-white shadow-sm">
@@ -173,6 +159,6 @@ export default function UserDashboard() {
           )}
         </div>
       </main>
-    </>
+    </div>
   );
 }

@@ -1,234 +1,155 @@
 import React, { useState } from "react";
 import AppSidebar from "../components/Side-bar";
+import { LucideSearch } from "lucide-react";
 
-const initialCourses = [
-  {
-    id: "1",
-    title: "React for Beginners",
-    instructor: "John Doe",
-    duration: "6 weeks",
-  },
-  {
-    id: "2",
-    title: "Advanced JavaScript",
-    instructor: "Jane Smith",
-    duration: "8 weeks",
-  },
-  {
-    id: "3",
-    title: "UI/UX Design Fundamentals",
-    instructor: "Sarah Lee",
-    duration: "4 weeks",
-  },
-];
-
-const emptyForm = {
-  title: "",
-  instructor: "",
-  duration: "",
-};
-
-const CoursesPage = () => {
-  const [courses, setCourses] = useState(initialCourses);
-  const [enrolled, setEnrolled] = useState([]); // course IDs
-  const [form, setForm] = useState(emptyForm);
-  const [editingId, setEditingId] = useState(null);
+export default function ProductTable() {
   const [search, setSearch] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [selectedRows, setSelectedRows] = useState([]);
 
-  // Add or Edit Course
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const data = [
+    { id: 1, name: 'Apple MacBook Pro 17"', color: "Silver", category: "Laptop", price: 2999 },
+    { id: 2, name: "Microsoft Surface Pro", color: "White", category: "Laptop PC", price: 1999 },
+    { id: 3, name: "Magic Mouse 2", color: "Black", category: "Accessories", price: 99 },
+    { id: 4, name: "Apple Watch", color: "Silver", category: "Accessories", price: 179 },
+    { id: 5, name: "iPad", color: "Gold", category: "Tablet", price: 699 },
+    { id: 6, name: 'Apple iMac 27"', color: "Silver", category: "PC Desktop", price: 3999 },
+  ];
 
-    if (!form.title.trim()) return;
-
-    if (editingId) {
-      setCourses((prev) =>
-        prev.map((c) => (c.id === editingId ? { ...c, ...form } : c))
-      );
-    } else {
-      setCourses((prev) => [
-        ...prev,
-        { ...form, id: Date.now().toString() },
-      ]);
-    }
-
-    resetForm();
-  };
-
-  const resetForm = () => {
-    setForm(emptyForm);
-    setEditingId(null);
-    setIsModalOpen(false);
-  };
-
-  const handleEdit = (course) => {
-    setForm(course);
-    setEditingId(course.id);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = (id) => {
-    setCourses((prev) => prev.filter((c) => c.id !== id));
-    setEnrolled((prev) => prev.filter((cId) => cId !== id));
-  };
-
-  const toggleEnroll = (id) => {
-    setEnrolled((prev) =>
-      prev.includes(id)
-        ? prev.filter((cId) => cId !== id)
-        : [...prev, id]
+  const toggleRow = (id) => {
+    setSelectedRows((prev) =>
+      prev.includes(id) ? prev.filter((row) => row !== id) : [...prev, id]
     );
   };
 
-  const filteredCourses = courses.filter((c) =>
-    c.title.toLowerCase().includes(search.toLowerCase())
+  const toggleAll = () => {
+    if (selectedRows.length === data.length) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows(data.map((item) => item.id));
+    }
+  };
+
+  const filteredData = data.filter((item) =>
+    item.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <AppSidebar />
+      
+      {/* Sidebar */}
+      <div className="w-64 shrink-0">
+        <AppSidebar />
+      </div>
 
-      <main className="flex-1 p-6 lg:p-10">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Course Management
-          </h1>
+      {/* Main Content */}
+      <div className="container mx-auto mt-2 p-4 lg:p-8 xl:max-w-7xl">
+        
+        <div className="bg-white rounded-xl shadow-md border border-gray-200">
+          
+          {/* Header */}
+          <div className="p-4 flex flex-wrap items-center justify-between gap-3 border-b border-gray-200">
+            
+            {/* Search */}
+            <div className="relative w-full max-w-sm">
+              <span className="absolute left-3 top-2.5 text-gray-400"><LucideSearch size={24} /></span>
+              <input
+                type="text"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-300 outline-none"
+                placeholder="Search products..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
 
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="mt-4 md:mt-0 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700"
-          >
-            + Add Course
-          </button>
-        </div>
-
-        {/* Search */}
-        <input
-          type="text"
-          placeholder="Search courses..."
-          className="mb-6 w-full md:w-1/3 px-3 py-2 border rounded-lg"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-
-        {/* Course Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCourses.map((course) => {
-            const isEnrolled = enrolled.includes(course.id);
-
-            return (
-              <div
-                key={course.id}
-                className="bg-white p-5 rounded-xl shadow hover:shadow-md transition"
+            {/* Filter Button */}
+            <div className="relative">
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg"
               >
-                <h2 className="text-lg font-semibold">
-                  {course.title}
-                </h2>
-                <p className="text-sm text-gray-500">
-                  {course.instructor}
-                </p>
-                <p className="text-sm mt-1">{course.duration}</p>
+                Filter ⌄
+              </button>
 
-                {/* Actions */}
-                <div className="mt-4 flex gap-2 flex-wrap">
-                  <button
-                    onClick={() => toggleEnroll(course.id)}
-                    className={`flex-1 py-2 rounded-lg text-sm ${
-                      isEnrolled
-                        ? "bg-green-500 text-white"
-                        : "bg-blue-600 text-white hover:bg-blue-700"
-                    }`}
-                  >
-                    {isEnrolled ? "Enrolled" : "Enroll"}
-                  </button>
-
-                  <button
-                    onClick={() => handleEdit(course)}
-                    className="px-3 py-2 bg-yellow-400 rounded-lg text-sm"
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    onClick={() => handleDelete(course.id)}
-                    className="px-3 py-2 bg-red-500 text-white rounded-lg text-sm"
-                  >
-                    Delete
-                  </button>
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                  {["Color", "Category", "Price"].map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => setDropdownOpen(false)}
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                    >
+                      {item}
+                    </button>
+                  ))}
                 </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Empty state */}
-        {filteredCourses.length === 0 && (
-          <p className="text-center text-gray-500 mt-10">
-            No courses found.
-          </p>
-        )}
-
-        {/* Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
-              <h2 className="text-lg font-semibold mb-4">
-                {editingId ? "Edit Course" : "Add Course"}
-              </h2>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                  placeholder="Course Title"
-                  className="w-full border p-2 rounded-lg"
-                  value={form.title}
-                  onChange={(e) =>
-                    setForm({ ...form, title: e.target.value })
-                  }
-                />
-
-                <input
-                  placeholder="Instructor"
-                  className="w-full border p-2 rounded-lg"
-                  value={form.instructor}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      instructor: e.target.value,
-                    })
-                  }
-                />
-
-                <input
-                  placeholder="Duration"
-                  className="w-full border p-2 rounded-lg"
-                  value={form.duration}
-                  onChange={(e) =>
-                    setForm({ ...form, duration: e.target.value })
-                  }
-                />
-
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="px-4 py-2 border rounded-lg"
-                  >
-                    Cancel
-                  </button>
-
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">
-                    Save
-                  </button>
-                </div>
-              </form>
+              )}
             </div>
           </div>
-        )}
-      </main>
+
+          {/* Table Wrapper */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-gray-700">
+              
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="p-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.length === data.length}
+                      onChange={toggleAll}
+                    />
+                  </th>
+                  <th className="px-6 py-3 text-left font-semibold">Product</th>
+                  <th className="px-6 py-3 text-left font-semibold">Color</th>
+                  <th className="px-6 py-3 text-left font-semibold">Category</th>
+                  <th className="px-6 py-3 text-left font-semibold">Price</th>
+                  <th className="px-6 py-3 text-left font-semibold">Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredData.map((item) => (
+                  <tr
+                    key={item.id}
+                    className="border-b hover:bg-gray-50 transition"
+                  >
+                    <td className="p-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedRows.includes(item.id)}
+                        onChange={() => toggleRow(item.id)}
+                      />
+                    </td>
+                    <td className="px-6 py-4 font-medium text-gray-900">
+                      {item.name}
+                    </td>
+                    <td className="px-6 py-4">{item.color}</td>
+                    <td className="px-6 py-4">{item.category}</td>
+                    <td className="px-6 py-4 font-medium">
+                      ${item.price}
+                    </td>
+                    <td className="px-6 py-4">
+                      <button className="text-gray-600 hover:text-black hover:underline">
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+
+                {filteredData.length === 0 && (
+                  <tr>
+                    <td colSpan="6" className="text-center py-6 text-gray-400">
+                      No results found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default CoursesPage;
+}

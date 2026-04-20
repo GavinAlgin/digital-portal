@@ -90,7 +90,7 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/admin/courses"
+        path="/admin/config"
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <CoursesPage />

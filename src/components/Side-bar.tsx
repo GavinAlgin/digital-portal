@@ -73,7 +73,7 @@ export default function AppSidebar() {
   const mainLinks: NavItem[] = [
     { title: "Dashboard", url: "/admin", icon: IconDashboard },
     { title: "Reports", url: "/admin/reports", icon: IconListDetails },
-    { title: "System Config", url: "/admin/config", icon: IconFolder },
+    { title: "Workbench", url: "/admin/config", icon: IconFolder },
   ]
 
   const groups: NavGroup[] = [

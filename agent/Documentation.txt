@@ -1,0 +1,6 @@
+🔐 1. Agent authentication (JWT or device tokens)
+🗄️ 2. Database storage (PostgreSQL)
+📡 3. WebSocket broadcast engine (real-time UI)
+📦 4. Windows installer (.exe agent deployer)
+📊 5. Logs + audit trail system
+📴 6. Offline device detection + retry queue

@@ -4,3 +4,6 @@
 📦 4. Windows installer (.exe agent deployer)
 📊 5. Logs + audit trail system
 📴 6. Offline device detection + retry queue
+
+#run the server 
+uvicorn main:app --host 0.0.0.0 --port 8000

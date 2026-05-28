@@ -81,7 +81,7 @@ export default function AppSidebar() {
       title: "Students",
       icon: IconUsers,
       items: [
-        { title: "All Students", url: "/admin/students" },
+        { title: "All Students", url: "/admin/users" },
         { title: "Register Student", url: "/admin/students/create" },
         { title: "Attendance", url: "/admin/attendance" },
       ],
@@ -101,13 +101,13 @@ export default function AppSidebar() {
       items: [
         { title: "Student Payments", url: "/admin/finance/payments" },
         { title: "Invoices", url: "/admin/finance/invoices" },
-        { title: "Financial Reports", url: "/admin/finance/reports" },
+        { title: "Financial Reports", url: "/admin/finance" },
       ],
     },
   ]
 
   const documents: NavItem[] = [
-    { title: "Data Library", url: "#", icon: IconDatabase },
+    { title: "Data Library", url: "/admin/enquiredata", icon: IconDatabase },
     { title: "Reports", url: "#", icon: IconReport },
   ]
 

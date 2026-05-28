@@ -17,6 +17,7 @@ import ReportDashboard from "./pages/admin/ReportDashboard";
 import FinanceDashboard from "./pages/admin/FinanceDashboard";
 import CoursesPage from "./pages/CoursesPage";
 import ITWorkbenchDashboard from "./pages/admin/ITWorkbenchDashboard";
+import EnquireDashboard from "./pages/admin/EnquireDashboard";
 
 function AppRoutes() {
   const { isAuthenticated, role } = useAuth();
@@ -143,6 +144,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <FinanceDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/enquiredata"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <EnquireDashboard />
           </ProtectedRoute>
         }
       />

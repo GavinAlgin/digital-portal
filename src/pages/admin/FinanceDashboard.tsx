@@ -4,6 +4,7 @@ import ListecLogo from "../../assets/cropped-flyer-02102024-133x133.png";
 import { getCurrentUser, type User } from "../../hooks/context/AdminLogged";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import AppSidebar from "../../components/Side-bar";
 
 type Proposal = {
   id: number;
@@ -91,7 +92,7 @@ export default function FinanceDashboard() {
 
         {/* Header */}
         <div className="flex justify-between items-center">
-            <Header
+            {/* <Header
                 logo={ListecLogo}
                 logoText="LISTEC"
                 navItems={[
@@ -107,7 +108,8 @@ export default function FinanceDashboard() {
                 userProfileUrl={`https://avatar.iran.liara.run/username?username=${encodeURIComponent(
                 `${user.first_name ?? ""} ${user.last_name ?? ""}`
                 )}`}
-            />
+            /> */}
+            <AppSidebar />
             <div className="mt-12">
                 <h1 className="text-2xl font-semibold">
                     Welcome back, Joshua!

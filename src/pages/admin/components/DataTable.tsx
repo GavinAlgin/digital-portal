@@ -4,36 +4,50 @@ import {
   getFilteredRowModel,
   useReactTable,
   type FilterFn,
+  type RowSelectionState,
 } from "@tanstack/react-table"
-import { userColumns, type AppUser } from "./types/Column"
 import { useState } from "react"
-import EditStudentModal from "../../../components/EditModal"
-import DeleteStudentModal from "../../../components/DeleteModal"
+import { Loader2, RefreshCw } from "lucide-react"
+
+import { createEnquiryColumns } from "./types/EnquireColumns"
 import { supabase } from "../../../hooks/supabase/supabaseClient"
 
+
+interface Enquiry {
+  id: string
+  fullname: string
+  email: string
+  phone: string
+  programme: string
+  studyMode: string
+  message: string
+  created: string
+}
+
 interface Props {
-  data: AppUser[]
+  data: Enquiry[]
   loading: boolean
   page: number
   pageSize: number
   total: number
   onPageChange: (page: number) => void
-  refreshData: () => void
+  refreshData: () => Promise<void>
 }
 
-/**
- * 🔍 Search ONLY name + email
- */
-const nameEmailFilter: FilterFn<AppUser> = (row, _columnId, filterValue) => {
-  const search = filterValue.toLowerCase()
+const enquiryFilter: FilterFn<Enquiry> = (
+  row,
+  _columnId,
+  filterValue
+) => {
+  const search = String(filterValue).toLowerCase()
 
-  const name = row.original.firstName?.toLowerCase() ?? ""
-  const email = row.original.email?.toLowerCase() ?? ""
-
-  return name.includes(search) || email.includes(search)
+  return (
+    row.original.fullname?.toLowerCase().includes(search) ||
+    row.original.email?.toLowerCase().includes(search)
+  )
 }
 
-export default function UserTable({
+export default function EnquiryTable({
   data,
   loading,
   page,
@@ -42,68 +56,142 @@ export default function UserTable({
   onPageChange,
   refreshData,
 }: Props) {
-  const [selectedUser, setSelectedUser] = useState<AppUser | null>(null)
-  const [editOpen, setEditOpen] = useState(false)
-  const [deleteOpen, setDeleteOpen] = useState(false)
   const [globalFilter, setGlobalFilter] = useState("")
-  const [users, setUsers] = useState<AppUser[]>([])
+  const [fetching, setFetching] = useState(false)
+  const [rowSelection, setRowSelection] =
+    useState<RowSelectionState>({})
 
-  const fetchUsers = async () => {
-    const { data, error } = await supabase.from("users").select("*")
-    if (error) {
-      console.error(error)
-      return
+  const handleRefresh = async () => {
+    try {
+      setFetching(true)
+      await refreshData()
+    } finally {
+      setFetching(false)
     }
-    setUsers(data as AppUser[])
   }
 
-  const table = useReactTable({
+  const handleBulkDelete = async () => {
+    const selectedIds = Object.keys(rowSelection)
+
+    if (!selectedIds.length) return
+
+    const confirmed = window.confirm(
+      `Delete ${selectedIds.length} enquiries?`
+    )
+
+    if (!confirmed) return
+
+    const { error } = await supabase
+      .from("interest_form")
+      .delete()
+      .in("id", selectedIds)
+
+    if (error) {
+      alert(error.message)
+      return
+    }
+
+    setRowSelection({})
+    await refreshData()
+  }
+
+  const exportExcel = () => {
+    // TODO:
+    // Add xlsx export implementation here
+    console.log("Export Excel")
+  }
+
+  const table = useReactTable<Enquiry>({
     data,
-    columns: userColumns(
-      user => console.log("View", user),
-      user => {
-        setSelectedUser(user)
-        setEditOpen(true)
-      },
-      user => {
-        setSelectedUser(user)
-        setDeleteOpen(true)
-      },
-      refreshData
-    ),
+
+    columns: createEnquiryColumns((message: string) => {
+      alert(message)
+    }),
+
     state: {
       globalFilter,
+      rowSelection,
     },
-    globalFilterFn: nameEmailFilter,
+
+    enableRowSelection: true,
+
+    onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setGlobalFilter,
+
+    globalFilterFn: enquiryFilter,
+
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+
     manualPagination: true,
     pageCount: Math.ceil(total / pageSize),
   })
 
-  if (!users) return null
+  const selectedCount = Object.keys(rowSelection).length
+
   return (
-    <div className="relative overflow-x-auto rounded-lg bg-white">
-      {/* Search */}
-      <div className="p-4">
-        <div className="relative max-w-sm">
+    <div className="overflow-x-auto rounded-lg bg-white">
+      {/* Toolbar */}
+      <div className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
+        <div className="w-full md:max-w-sm">
           <input
             type="text"
             value={globalFilter}
             onChange={e => setGlobalFilter(e.target.value)}
-            placeholder="Search by name or email"
-            className="block w-full bg-gray-100/35 rounded py-2 pl-3 pr-3 text-sm focus:outline-none"
+            placeholder="Search by name or email..."
+            className="w-full rounded bg-gray-100 px-3 py-2 text-sm focus:outline-none"
           />
+        </div>
+
+        <div className="flex flex-wrap justify-end gap-2">
+          <button
+            onClick={exportExcel}
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
+          >
+            Export Excel
+          </button>
+
+          <button
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
+          >
+            Filter By Date
+          </button>
+
+          <button
+            disabled={!selectedCount}
+            onClick={handleBulkDelete}
+            className="rounded-lg border border-red-200 px-4 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+          >
+            Bulk Delete ({selectedCount})
+          </button>
+
+          <button
+            onClick={handleRefresh}
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
+          >
+            {fetching ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <RefreshCw className="h-5 w-5" />
+            )}
+          </button>
         </div>
       </div>
 
       {/* Table */}
-      <table className="w-full text-left text-sm text-black">
-        <thead className="bg-gray-100/35">
-          {table.getHeaderGroups().map(hg => (
-            <tr key={hg.id}>
-              {hg.headers.map(header => (
+      <table className="w-full text-left text-sm">
+        <thead className="bg-gray-100">
+          {table.getHeaderGroups().map(headerGroup => (
+            <tr key={headerGroup.id}>
+              <th className="px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={table.getIsAllRowsSelected()}
+                  onChange={table.getToggleAllRowsSelectedHandler()}
+                />
+              </th>
+
+              {headerGroup.headers.map(header => (
                 <th
                   key={header.id}
                   className="px-6 py-3 font-semibold uppercase"
@@ -119,19 +207,34 @@ export default function UserTable({
         </thead>
 
         <tbody>
-          {loading && (
+          {loading ? (
             <tr>
-              <td colSpan={6} className="py-10 text-center">
-                Loading users...
+              <td
+                colSpan={table.getAllColumns().length + 1}
+                className="py-10 text-center"
+              >
+                Loading enquiries...
               </td>
             </tr>
-          )}
-
-          {!loading &&
+          ) : table.getRowModel().rows.length ? (
             table.getRowModel().rows.map(row => (
-              <tr key={row.id} className="hover:bg-gray-100">
+              <tr
+                key={row.id}
+                className="border-b hover:bg-gray-50"
+              >
+                <td className="px-4 py-4">
+                  <input
+                    type="checkbox"
+                    checked={row.getIsSelected()}
+                    onChange={row.getToggleSelectedHandler()}
+                  />
+                </td>
+
                 {row.getVisibleCells().map(cell => (
-                  <td key={cell.id} className="px-6 py-4">
+                  <td
+                    key={cell.id}
+                    className="px-6 py-4"
+                  >
                     {flexRender(
                       cell.column.columnDef.cell,
                       cell.getContext()
@@ -139,12 +242,14 @@ export default function UserTable({
                   </td>
                 ))}
               </tr>
-            ))}
-
-          {!loading && table.getRowModel().rows.length === 0 && (
+            ))
+          ) : (
             <tr>
-              <td colSpan={6} className="py-10 text-center">
-                No users found.
+              <td
+                colSpan={table.getAllColumns().length + 1}
+                className="py-10 text-center"
+              >
+                No enquiries found.
               </td>
             </tr>
           )}
@@ -152,57 +257,33 @@ export default function UserTable({
       </table>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between px-4 py-3 text-sm">
-        <span>
-          Page {page} of {Math.ceil(total / pageSize)}
+      <div className="flex items-center justify-between px-4 py-4">
+        <span className="text-sm">
+          Page {page} of{" "}
+          {Math.max(
+            1,
+            Math.ceil(total / pageSize)
+          )}
         </span>
 
         <div className="space-x-2">
           <button
-            onClick={() => onPageChange(page - 1)}
             disabled={page === 1}
-            className="rounded px-3 py-1 disabled:opacity-40"
+            onClick={() => onPageChange(page - 1)}
+            className="rounded border px-3 py-1 disabled:opacity-50"
           >
             Previous
           </button>
+
           <button
-            onClick={() => onPageChange(page + 1)}
             disabled={page * pageSize >= total}
-            className="rounded px-3 py-1 disabled:opacity-40"
+            onClick={() => onPageChange(page + 1)}
+            className="rounded border px-3 py-1 disabled:opacity-50"
           >
             Next
           </button>
         </div>
       </div>
-
-      {/* Edit Modal */}
-      <EditStudentModal
-        isOpen={editOpen}
-        student={selectedUser ?? undefined}
-        onClose={() => {
-          setEditOpen(false)
-          setSelectedUser(null)
-        }}
-        onSave={(updatedUser) => {
-          // 🔁 Optimistically update table state
-          setUsers((prev) =>
-            prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
-          )
-        }}
-        refreshData={fetchUsers} // optional if you use it
-      />
-
-
-      {/* Delete Modal */}
-      <DeleteStudentModal
-        isOpen={deleteOpen}
-        student={selectedUser || undefined}
-        onClose={() => setDeleteOpen(false)}
-        onDelete={() => {
-          console.log("Deleted user")
-          refreshData()
-        }}
-      />
     </div>
   )
 }

@@ -1,3 +1,105 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
+
+import { getCurrentUser, type User } from "../../hooks/context/AdminLogged";
+import AppSidebar from "../../components/Side-bar";
+
+const ITWorkbenchDashboard: React.FC = () => {
+  const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchUser = async () => {
+      try {
+        const loggedUser = await getCurrentUser();
+
+        if (!loggedUser) {
+          navigate("/admin/login", { replace: true });
+          return;
+        }
+
+        if (isMounted) {
+          setUser(loggedUser);
+        }
+      } catch (error) {
+        console.error("Failed to fetch current user:", error);
+        navigate("/admin/login", { replace: true });
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <Loader2 className="h-10 w-10 animate-spin text-gray-600" />
+      </div>
+    );
+  }
+
+  // Redirect fallback
+  if (!user) return null;
+
+  return (
+    <div className="flex min-h-screen bg-white">
+      {/* Sidebar */}
+      <AppSidebar />
+
+      {/* Main Content */}
+      <main className="container mx-auto mt-2 p-4 lg:p-8 xl:max-w-7xl">
+        {/* Header */}
+        <div className="flex flex-col gap-2">
+          <h1 className="text-xl font-bold text-black">
+            IT WorkBench Dashboard
+          </h1>
+
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            Total Number of Computers Online <strong>20</strong>.
+          </p>
+        </div>
+
+        <section className="w-full py-10 mt-34">
+          <div className="mx-auto max-w-screen-md text-center">
+            <svg
+              className="mx-auto mb-4 h-10 w-10 text-gray-400"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+              fill="currentColor">
+              <path d="M331.8 224.1c28.29 0 54.88 10.99 74.86 30.97l19.59 19.59c40.01-17.74 71.25-53.3 81.62-96.65c5.725-23.92 5.34-47.08 .2148-68.4c-2.613-10.88-16.43-14.51-24.34-6.604l-68.9 68.9h-75.6V97.2l68.9-68.9c7.912-7.912 4.275-21.73-6.604-24.34c-21.32-5.125-44.48-5.51-68.4 .2148c-55.3 13.23-98.39 60.22-107.2 116.4C224.5 128.9 224.2 137 224.3 145l82.78 82.86C315.2 225.1 323.5 224.1 331.8 224.1zM384 278.6c-23.16-23.16-57.57-27.57-85.39-13.9L191.1 158L191.1 95.99l-127.1-95.99L0 63.1l96 127.1l62.04 .0077l106.7 106.6c-13.67 27.82-9.251 62.23 13.91 85.39l117 117.1c14.62 14.5 38.21 14.5 52.71-.0016l52.75-52.75c14.5-14.5 14.5-38.08-.0016-52.71L384 278.6zM227.9 307L168.7 247.9l-148.9 148.9c-26.37 26.37-26.37 69.08 0 95.45C32.96 505.4 50.21 512 67.5 512s34.54-6.592 47.72-19.78l119.1-119.1C225.5 352.3 222.6 329.4 227.9 307zM64 472c-13.25 0-24-10.75-24-24c0-13.26 10.75-24 24-24S88 434.7 88 448C88 461.3 77.25 472 64 472z" />
+            </svg>
+
+            <h1 className="mb-4 text-4xl font-bold tracking-tight text-black md:text-5xl xl:text-6xl">
+              Under Maintenance
+            </h1>
+
+            <p className="text-gray-500 dark:text-gray-400 md:text-lg xl:text-xl">
+              Our Enterprise administrators are performing scheduled
+              maintenance.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+};
+
+export default ITWorkbenchDashboard;
+
 // import { useState, useRef, useEffect, useMemo } from "react";
 // import { LucideArrowDown01, Search as LucideSearch } from "lucide-react";
 // import AppSidebar from "../../components/Side-bar";
@@ -313,137 +415,137 @@
 // };
 
 // export default ITWorkbenchDashboard;
-import { useState } from "react";
-import { sendCommand } from "../../hooks/api";
-import { useAgents } from "../../hooks/api/useAgents";
+// import { useState } from "react";
+// import { sendCommand } from "../../hooks/api";
+// import { useAgents } from "../../hooks/api/useAgents";
 // import { useAgents } from "../hooks/useAgents";
 // import { sendCommand } from "../api";
 
-export default function Dashboard() {
-  const { agents } = useAgents();
-  const [search, setSearch] = useState("");
+// export default function Dashboard() {
+//   const { agents } = useAgents();
+//   const [search, setSearch] = useState("");
 
-  const filtered = agents.filter((a: any) =>
-    a.hostname?.toLowerCase().includes(search.toLowerCase())
-  );
+//   const filtered = agents.filter((a: any) =>
+//     a.hostname?.toLowerCase().includes(search.toLowerCase())
+//   );
 
-  const toggleRow = (id) => {
-    setSelectedRows((prev) =>
-      prev.includes(id)
-        ? prev.filter((row) => row !== id)
-        : [...prev, id]
-    );
-  };
+//   const toggleRow = (id) => {
+//     setSelectedRows((prev) =>
+//       prev.includes(id)
+//         ? prev.filter((row) => row !== id)
+//         : [...prev, id]
+//     );
+//   };
 
-  const toggleAll = () => {
-    if (selectedRows.length === filteredData.length) {
-      setSelectedRows([]);
-    } else {
-      setSelectedRows(filteredData.map((item) => item.id));
-    }
-  };
+//   const toggleAll = () => {
+//     if (selectedRows.length === filteredData.length) {
+//       setSelectedRows([]);
+//     } else {
+//       setSelectedRows(filteredData.map((item) => item.id));
+//     }
+//   };
 
-  useEffect(() => {
-    if (selectAllRef.current) {
-      selectAllRef.current.indeterminate =
-        selectedRows.length > 0 &&
-        selectedRows.length < filteredData.length;
-    }
-  }, [selectedRows, filteredData]);
+//   useEffect(() => {
+//     if (selectAllRef.current) {
+//       selectAllRef.current.indeterminate =
+//         selectedRows.length > 0 &&
+//         selectedRows.length < filteredData.length;
+//     }
+//   }, [selectedRows, filteredData]);
 
-  return (
-    <div className="min-h-screen bg-zinc-950 text-white flex">
+//   return (
+//     <div className="min-h-screen bg-zinc-950 text-white flex">
       
-      {/* Sidebar */}
-      <div className="w-64 border-r border-zinc-800 p-4">
-        <h1 className="text-lg font-semibold">Intune Lite</h1>
-        <p className="text-xs text-zinc-400 mt-2">
-          Device Management Console
-        </p>
-      </div>
+//       {/* Sidebar */}
+//       <div className="w-64 border-r border-zinc-800 p-4">
+//         <h1 className="text-lg font-semibold">Intune Lite</h1>
+//         <p className="text-xs text-zinc-400 mt-2">
+//           Device Management Console
+//         </p>
+//       </div>
 
-      {/* Main */}
-      <div className="flex-1 p-6">
+//       {/* Main */}
+//       <div className="flex-1 p-6">
 
-        {/* Topbar */}
-        <div className="flex justify-between items-center mb-6">
-          <input
-            placeholder="Search devices..."
-            className="bg-zinc-900 border border-zinc-800 px-3 py-2 rounded-md w-80"
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+//         {/* Topbar */}
+//         <div className="flex justify-between items-center mb-6">
+//           <input
+//             placeholder="Search devices..."
+//             className="bg-zinc-900 border border-zinc-800 px-3 py-2 rounded-md w-80"
+//             onChange={(e) => setSearch(e.target.value)}
+//           />
+//         </div>
 
-        {/* Table */}
-        <div className="border border-zinc-800 rounded-lg overflow-hidden">
+//         {/* Table */}
+//         <div className="border border-zinc-800 rounded-lg overflow-hidden">
 
-          <table className="w-full text-sm">
-            <thead className="bg-zinc-900 text-zinc-400">
-              <tr>
-                <th className="text-left p-3">Device</th>
-                <th>Status</th>
-                <th>OS</th>
-                <th>RAM</th>
-                <th>Disk</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+//           <table className="w-full text-sm">
+//             <thead className="bg-zinc-900 text-zinc-400">
+//               <tr>
+//                 <th className="text-left p-3">Device</th>
+//                 <th>Status</th>
+//                 <th>OS</th>
+//                 <th>RAM</th>
+//                 <th>Disk</th>
+//                 <th>Actions</th>
+//               </tr>
+//             </thead>
 
-            <tbody>
-              {filtered.map((a: any) => (
-                <tr
-                  key={a.agent_id}
-                  className="border-t border-zinc-800 hover:bg-zinc-900"
-                >
-                  <td className="p-3 font-medium">
-                    {a.hostname}
-                  </td>
+//             <tbody>
+//               {filtered.map((a: any) => (
+//                 <tr
+//                   key={a.agent_id}
+//                   className="border-t border-zinc-800 hover:bg-zinc-900"
+//                 >
+//                   <td className="p-3 font-medium">
+//                     {a.hostname}
+//                   </td>
 
-                  <td>
-                    <span className="text-green-400">
-                      {a.meta?.status || "online"}
-                    </span>
-                  </td>
+//                   <td>
+//                     <span className="text-green-400">
+//                       {a.meta?.status || "online"}
+//                     </span>
+//                   </td>
 
-                  <td>{a.os}</td>
+//                   <td>{a.os}</td>
 
-                  <td>
-                    {a.meta?.metrics?.total_ram_gb || "-"} GB
-                  </td>
+//                   <td>
+//                     {a.meta?.metrics?.total_ram_gb || "-"} GB
+//                   </td>
 
-                  <td>
-                    {a.meta?.metrics?.free_disk_gb || "-"} GB
-                  </td>
+//                   <td>
+//                     {a.meta?.metrics?.free_disk_gb || "-"} GB
+//                   </td>
 
-                  <td className="flex gap-2 p-2">
+//                   <td className="flex gap-2 p-2">
 
-                    <button
-                      className="px-2 py-1 text-xs bg-blue-600 rounded"
-                      onClick={() =>
-                        sendCommand(a.agent_id, "ping")
-                      }
-                    >
-                      Ping
-                    </button>
+//                     <button
+//                       className="px-2 py-1 text-xs bg-blue-600 rounded"
+//                       onClick={() =>
+//                         sendCommand(a.agent_id, "ping")
+//                       }
+//                     >
+//                       Ping
+//                     </button>
 
-                    <button
-                      className="px-2 py-1 text-xs bg-red-600 rounded"
-                      onClick={() =>
-                        sendCommand(a.agent_id, "shutdown")
-                      }
-                    >
-                      Shutdown
-                    </button>
+//                     <button
+//                       className="px-2 py-1 text-xs bg-red-600 rounded"
+//                       onClick={() =>
+//                         sendCommand(a.agent_id, "shutdown")
+//                       }
+//                     >
+//                       Shutdown
+//                     </button>
 
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
 
-          </table>
-        </div>
+//           </table>
+//         </div>
 
-      </div>
-    </div>
-  );
-}
+//       </div>
+//     </div>
+//   );
+// }

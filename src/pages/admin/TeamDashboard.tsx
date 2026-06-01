@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { getCurrentUser, type User } from "../../hooks/context/AdminLogged";
 import AppSidebar from "../../components/Side-bar";
 
-const ReportDashboard: React.FC = () => {
+const TeamDashbaord: React.FC = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -65,11 +65,11 @@ const ReportDashboard: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col gap-2">
           <h1 className="text-xl font-bold text-black">
-            Report Dashboard
+            Team's Dashboard
           </h1>
 
           <p className="text-sm text-neutral-500 dark:text-neutral-400">
-            Welcome, you have <strong>33</strong> ticket reports.
+            Total Number of Stuff Members <strong>20</strong>.
           </p>
         </div>
 
@@ -98,4 +98,4 @@ const ReportDashboard: React.FC = () => {
   );
 };
 
-export default ReportDashboard;
+export default TeamDashbaord;

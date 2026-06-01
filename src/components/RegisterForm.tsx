@@ -138,28 +138,13 @@ export default function RegisterForm() {
   if (!user) return <p>Loading or not logged in...</p>;
 
   return (
-    <div className="isolate bg-white px-6 pt-16 pb-24 sm:py-32 lg:px-8 relative">
-      <Header
-        logo={ListecLogo}
-        logoText="LISTEC"
-        navItems={[
-          { label: "Dashboard", href: "/admin" },
-          { label: "Tickets", href: "/admin/tickets" },
-          { label: "Attendance", href: "/admin/attendance" },
-          { label: "Reports", href: "/admin/reports" },
-          { label: "Users", href: "/admin/users" },
-        ]}
-        notificationsCount={3}
-        userName={user.first_name ?? user.email ?? "User"}
-        userProfileUrl={`https://avatar.iran.liara.run/username?username=${user.first_name}+${user.last_name}`}
-      />
-
-      <div className="mx-auto max-w-xl text-center">
+    <div className="isolate bg-white p-4 relative">
+      {/* <div className="mx-auto max-w-xl text-center">
         <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">Student Registration</h1>
         <p className="mt-4 text-lg text-gray-600">Fill in the form to register a new student.</p>
-      </div>
+      </div> */}
 
-      <form onSubmit={handleSubmit} className="mx-auto mt-16 max-w-xl">
+      <form onSubmit={handleSubmit} className="mx-auto max-w-xl">
         <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
           {/* FIRST NAME */}
           <FieldInput label="First name" name="firstName" value={formData.firstName} onChange={handleChange} error={errors.firstName} placeholder="Jane" />

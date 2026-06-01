@@ -78,7 +78,7 @@ export default function Settings() {
         </div>
 
         {/* Content */}
-        <div className="col-span-8 rounded-xl sm:bg-gray-50 sm:px-8 sm:shadow">
+        <div className="col-span-8 rounded-xl sm:bg-white sm:px-8">
           <h2 className="py-4 text-2xl font-semibold">Account settings</h2>
           <hr className="mb-8" />
 

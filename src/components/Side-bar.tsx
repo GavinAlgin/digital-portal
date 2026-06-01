@@ -82,7 +82,7 @@ export default function AppSidebar() {
       icon: IconUsers,
       items: [
         { title: "All Students", url: "/admin/users" },
-        { title: "Register Student", url: "/admin/students/create" },
+        { title: "Register Student", url: "/admin/register" },
         { title: "Attendance", url: "/admin/attendance" },
       ],
     },
@@ -107,14 +107,14 @@ export default function AppSidebar() {
   ]
 
   const documents: NavItem[] = [
-    { title: "Data Library", url: "/admin/enquiredata", icon: IconDatabase },
-    { title: "Reports", url: "#", icon: IconReport },
+    { title: "Enquire Forms", url: "/admin/enquiredata", icon: IconDatabase },
+    { title: "Admissions", url: "/admin/applications", icon: IconReport },
   ]
 
   const secondary: NavItem[] = [
     { title: "Settings", url: "/admin/settings", icon: IconSettings },
     { title: "Help", url: "#", icon: IconHelp },
-    { title: "Search", url: "#", icon: IconSearch },
+    { title: "Announcement", url: "/admin/announcement", icon: IconSearch },
   ]
 
   /* ------------------------------ Render ------------------------------ */

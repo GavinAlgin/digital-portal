@@ -6,7 +6,6 @@ import { AuthProvider, useAuth } from "./hooks/context/AuthContext";
 import ProtectedRoute from "./hooks/routes/ProtectedRoute";
 import UsersDataDashboard from "./pages/admin/UsersDataDashboard";
 import EventDashboard from "./pages/admin/EventDashboard";
-import RegistrationForm from "./components/RegisterForm";
 import ForgotPassword from "./components/reset-password/ForgotPassword";
 import AccommodationForm from "./pages/users/AccommodationForm";
 import { SupportForm } from "./pages/SupportForm";
@@ -15,9 +14,13 @@ import SignupConfirmed from "./pages/ConfirmationPage";
 import TimeTableDashboard from "./pages/admin/TimeTableDashboard";
 import ReportDashboard from "./pages/admin/ReportDashboard";
 import FinanceDashboard from "./pages/admin/FinanceDashboard";
-import CoursesPage from "./pages/CoursesPage";
 import ITWorkbenchDashboard from "./pages/admin/ITWorkbenchDashboard";
 import EnquireDashboard from "./pages/admin/EnquireDashboard";
+import RegisterDashbaord from "./pages/admin/RegisterDashboard";
+import TeamDashbaord from "./pages/admin/TeamDashboard";
+import AdmissionsDashboard from "./pages/admin/AdmissionsDashboard";
+import AccountSettingsDashboard from "./pages/admin/AccountSettingsDashboard";
+import AnnouncementDashboard from "./pages/admin/AnnocementDashboard";
 
 function AppRoutes() {
   const { isAuthenticated, role } = useAuth();
@@ -119,7 +122,7 @@ function AppRoutes() {
         path="/admin/register"
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
-            <RegistrationForm />
+            <RegisterDashbaord />
           </ProtectedRoute>
         }
       />
@@ -152,6 +155,38 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <EnquireDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/applications"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdmissionsDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/team"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <TeamDashbaord />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/settings"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AccountSettingsDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/anouncement"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AnnouncementDashboard />
           </ProtectedRoute>
         }
       />
